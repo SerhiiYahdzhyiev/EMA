@@ -1,0 +1,84 @@
+project(EMA)
+cmake_minimum_required(VERSION 3.17)
+
+# NVML
+find_package(CUDAToolkit)
+
+# hashmap
+add_library(
+    hashmap STATIC
+    EMA/ext/c-hashmap/map.c
+    EMA/ext/c-hashmap/map.h
+)
+
+# EMA
+add_library(EMA SHARED)
+target_sources(
+    EMA
+    # core
+    PRIVATE EMA/core/device.c
+    PRIVATE EMA/core/device.h
+    PUBLIC  EMA/core/device.user.h
+    PRIVATE EMA/core/plugin.h
+    PUBLIC  EMA/core/plugin.user.h
+    PRIVATE EMA/core/registry.c
+    PRIVATE EMA/core/registry.h
+    # plugins
+    PRIVATE EMA/plugins/plugin_rapl.c
+    PRIVATE EMA/plugins/plugin_rapl.h
+    # region
+    PRIVATE EMA/region/filter.c
+    PRIVATE EMA/region/filter.h
+    PUBLIC  EMA/region/filter.user.h
+    PRIVATE EMA/region/output.c
+    PRIVATE EMA/region/output.h
+    PUBLIC  EMA/region/output.user.h
+    PRIVATE EMA/region/region_store.c
+    PRIVATE EMA/region/region_store.h
+    PRIVATE EMA/region/region.c
+    PRIVATE EMA/region/region.h
+    PUBLIC  EMA/region/region.user.h
+    # utils
+    PRIVATE EMA/utils/time.c
+    PRIVATE EMA/utils/time.h
+    PUBLIC  EMA/utils/time.user.h
+    #
+    PRIVATE EMA/user.c
+    PUBLIC  EMA/user.h
+)
+target_include_directories(EMA PRIVATE .)
+target_compile_definitions(EMA PRIVATE _GNU_SOURCE)
+target_link_libraries(EMA PRIVATE hashmap)
+
+if( CUDAToolkit_FOUND)
+    # NVML plugin
+    target_sources(
+        EMA
+        PRIVATE EMA/plugins/plugin_nvml.c
+        PRIVATE EMA/plugins/plugin_nvml.h
+    )
+    target_compile_definitions(EMA PRIVATE EMA_HAVE_NVML)
+    target_link_libraries(EMA PRIVATE CUDA::nvml)
+endif()
+
+# tests
+add_executable(
+    basic
+    tests/basic.c
+)
+target_include_directories(basic PRIVATE .)
+target_link_libraries(basic PRIVATE EMA)
+
+# install
+# main public header
+install(FILES "EMA.h" DESTINATION "include")
+
+# other public headers - keep directory structure
+get_target_property(EMA_PUBLIC_HEADERS EMA INTERFACE_SOURCES)
+foreach(hfile ${EMA_PUBLIC_HEADERS})
+    file(RELATIVE_PATH hfile_rel "${PROJECT_SOURCE_DIR}" "${hfile}")
+    get_filename_component(hdir "${hfile_rel}" DIRECTORY)
+    install(FILES "${hfile}" DESTINATION "include/${hdir}")
+endforeach()
+
+install(TARGETS EMA)

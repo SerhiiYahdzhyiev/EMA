@@ -1,0 +1,218 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#include <nvml.h>
+
+#include <EMA/core/device.h>
+#include <EMA/core/plugin.h>
+#include <EMA/core/registry.h>
+
+#define COND_RET(COND, RET) \
+    if( COND ) \
+        return RET;
+
+#define _NVML_HANDLE_ERR(err, ret, format, ...) do { \
+        if(err) { \
+            fprintf(stderr, format, ##__VA_ARGS__); \
+            nvml_shutdown(); \
+            return ret; \
+        } \
+    } while(0)
+
+#define NVML_HANDLE_ERR(err, format, ...) \
+    _NVML_HANDLE_ERR(err, , format, ##__VA_ARGS__)
+
+#define NVML_HANDLE_ERR_RET_NULL(err, format, ...) \
+    _NVML_HANDLE_ERR(err, NULL, format, ##__VA_ARGS__)
+
+#define NVML_HANDLE_ERR_RET_0(err, format, ...) \
+    _NVML_HANDLE_ERR(err, 0, format, ##__VA_ARGS__)
+
+#define NVML_HANDLE_ERR_RET_1(err, format, ...) \
+    _NVML_HANDLE_ERR(err, 1, format, ##__VA_ARGS__)
+
+/* ****************************************************************************
+**** Typedefs
+**************************************************************************** */
+typedef struct
+{
+    DeviceArray devices;
+} NvmlPluginData;
+
+typedef struct
+{
+    unsigned idx;
+    nvmlDevice_t nvml_device;
+    char* name;
+} NvmlDeviceData;
+
+/* ****************************************************************************
+**** Internal
+**************************************************************************** */
+
+static
+void nvml_shutdown()
+{
+    nvmlReturn_t err = nvmlShutdown();
+    if(err)
+        printf("NVML shutdown failed: %s\n", nvmlErrorString(err));
+}
+
+static
+NvmlDeviceData* init_nvml_device(unsigned idx)
+{
+    nvmlReturn_t err;
+
+    /* Set NVML devices */
+    NvmlDeviceData* d_data = malloc(sizeof(NvmlDeviceData));
+
+    /* Set NVML device handle. */
+    err = nvmlDeviceGetHandleByIndex(idx, &d_data->nvml_device);
+    NVML_HANDLE_ERR_RET_NULL(
+        err,
+        "Failed to get device handle %u: %s\n",
+        idx, nvmlErrorString(err)
+    );
+
+    /* Set NVML device name */
+    char *device_name = malloc(NVML_DEVICE_NAME_V2_BUFFER_SIZE * sizeof(char));
+    err = nvmlDeviceGetName(
+        d_data->nvml_device,
+        device_name,
+        NVML_DEVICE_NAME_V2_BUFFER_SIZE
+    );
+    NVML_HANDLE_ERR_RET_NULL(
+        err,
+        "Failed to get name of device %u: %s\n",
+        idx, nvmlErrorString(err)
+    );
+    d_data->name = device_name;
+
+    /* Add index to device name. TODO: Why?
+     * Add index for distinction between devices with same name. */
+    // int ret = asprintf(&d_data->name, "%s[%u]", d_data->name, idx);
+    // if( ret == -1 )
+    //     d_data->name = strdup("");
+
+    /* Set NVML device index */
+    d_data->idx = idx;
+
+    return d_data;
+}
+
+/* ****************************************************************************
+**** Plugin interface
+**************************************************************************** */
+
+static
+int nvml_plugin_init(Plugin* plugin)
+{
+    DeviceArray devices;
+    nvmlReturn_t err;
+
+    /* Initialize NVML. */
+    err = nvmlInit();
+    NVML_HANDLE_ERR_RET_1(
+        err, "NVML initialization failed: %s\n", nvmlErrorString(err));
+
+    /* Set device count. */
+    unsigned int device_count = 0;
+    err = nvmlDeviceGetCount(&device_count);
+    NVML_HANDLE_ERR_RET_1(
+        err, "Could not query device count: %s\n", nvmlErrorString(err));
+    devices.size = device_count;
+
+    /* Init devices. */
+    devices.array = malloc(sizeof(Device)*devices.size);
+    for(int i = 0; i < devices.size; i++)
+    {
+        NvmlDeviceData* d_data = init_nvml_device(i);
+
+        /* Set device array. */
+        devices.array[i].data = d_data;
+        devices.array[i].plugin = plugin;
+
+        /* Keep default name on change. */
+        devices.array[i].name = d_data->name;
+    }
+
+    /* Set plugin data. */
+    NvmlPluginData* p_data = malloc(sizeof(NvmlPluginData));
+    p_data->devices = devices;
+
+    plugin->data = p_data;
+    return 0;
+}
+
+static
+DeviceArray nvml_plugin_get_devices(const Plugin* plugin)
+{
+    NvmlPluginData* p_data = plugin->data;
+    return p_data->devices;
+}
+
+static
+unsigned long long nvml_plugin_get_energy_uj(const Device* device)
+{
+    /*
+    * Read energy values of a single NVIDIA GPU, if available.
+    * Return energy consumption in uJ.
+    */
+    nvmlReturn_t err;
+    unsigned long long energy;
+    NvmlDeviceData* d_data = (NvmlDeviceData*) device->data;
+
+    /* Get energy consumption in mJ. */
+    err = nvmlDeviceGetTotalEnergyConsumption(d_data->nvml_device, &energy);
+    NVML_HANDLE_ERR_RET_0(
+        err,
+        "NVML - Failed to get total energy consumption of GPU %u: %s\n",
+        d_data->idx, nvmlErrorString(err)
+    );
+
+    return energy * 1000;
+}
+
+static
+int nvml_plugin_finalize(Plugin* plugin)
+{
+    NvmlPluginData* p_data = (NvmlPluginData*) plugin->data;
+    DeviceArray devices = p_data->devices;
+    for(int i = 0; i < devices.size; i++)
+    {
+        NvmlDeviceData* d_data = devices.array[i].data;
+        free(d_data->name);
+        free(d_data);
+    }
+    free(p_data->devices.array);
+    free(p_data);
+
+    nvml_shutdown();
+    return 0;
+}
+
+/* ****************************************************************************
+**** Extern
+**************************************************************************** */
+
+Plugin* create_nvml_plugin(const char* name)
+{
+    Plugin* plugin = malloc(sizeof(Plugin));
+    COND_RET(!plugin, NULL)
+
+    plugin->cbs.init = nvml_plugin_init;
+    plugin->cbs.get_devices = nvml_plugin_get_devices;
+    plugin->cbs.get_energy_uj = nvml_plugin_get_energy_uj;
+    plugin->cbs.finalize = nvml_plugin_finalize;
+    plugin->data = NULL;
+    plugin->name = name;
+
+    return plugin;
+}
+
+int register_nvml_plugin()
+{
+    Plugin *plugin = create_nvml_plugin("NVML");
+    COND_RET(!plugin, 1);
+    return EMA_register_plugin(plugin);
+}

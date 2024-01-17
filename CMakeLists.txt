@@ -1,8 +1,13 @@
 project(EMA)
 cmake_minimum_required(VERSION 3.17)
 
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+
 # NVML
 find_package(CUDAToolkit)
+
+# MQTT
+find_package(Mosquitto)
 
 # hashmap
 add_library(
@@ -50,7 +55,7 @@ target_include_directories(EMA PRIVATE .)
 target_compile_definitions(EMA PRIVATE _GNU_SOURCE)
 target_link_libraries(EMA PRIVATE hashmap)
 
-if( CUDAToolkit_FOUND)
+if( CUDAToolkit_FOUND )
     # NVML plugin
     target_sources(
         EMA
@@ -59,6 +64,19 @@ if( CUDAToolkit_FOUND)
     )
     target_compile_definitions(EMA PRIVATE EMA_HAVE_NVML)
     target_link_libraries(EMA PRIVATE CUDA::nvml)
+endif()
+
+if( Mosquitto_FOUND )
+    # MQTT plugin
+    target_sources(
+        EMA
+        PRIVATE EMA/plugins/plugin_mqtt.c
+        PRIVATE EMA/plugins/plugin_mqtt.h
+        PUBLIC EMA/plugins/plugin_mqtt.user.h
+    )
+    target_compile_definitions(EMA PRIVATE EMA_HAVE_MQTT)
+    target_include_directories(EMA PRIVATE ${MOSQUITTO_INCLUDE_DIR})
+    target_link_libraries(EMA PRIVATE ${MOSQUITTO_LIBRARY})
 endif()
 
 # tests

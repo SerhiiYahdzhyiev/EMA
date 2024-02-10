@@ -15,6 +15,7 @@ add_library(
     EMA/ext/c-hashmap/map.c
     EMA/ext/c-hashmap/map.h
 )
+set_property(TARGET hashmap PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 # EMA
 add_library(EMA SHARED)

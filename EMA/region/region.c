@@ -77,9 +77,9 @@ int EMA_region_end(Region *region)
     for(size_t i = 0; i < region->measurements.size; ++i)
     {
         Measurement* measurement = region->measurements.array + i;
-        measurement->time_result =
+        measurement->time_result +=
             EMA_get_time_in_us() - measurement->time_start;
-        measurement->energy_result = EMA_plugin_get_energy_uj(
+        measurement->energy_result += EMA_plugin_get_energy_uj(
             measurement->device) - measurement->energy_start;
     }
     return 0;

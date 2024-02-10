@@ -92,6 +92,7 @@ int EMA_region_finalize(Region *region)
     free(region->function);
     free(region->measurements.array);
     free(region);
+    return 0;
 }
 
 /* High-level API. */

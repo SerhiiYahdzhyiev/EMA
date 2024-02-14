@@ -64,7 +64,7 @@ int EMA_init(EMA_init_cb callback)
         Plugin *plugin = registry.plugins.array[i];
         int err = EMA_plugin_init(plugin);
         if( err )
-            return err;
+            continue;
 
         DeviceArray devices = EMA_get_plugin_devices(plugin);
         registry.devices.size += devices.size;

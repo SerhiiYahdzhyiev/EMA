@@ -29,6 +29,8 @@ target_sources(
     PUBLIC  EMA/core/plugin.user.h
     PRIVATE EMA/core/registry.c
     PRIVATE EMA/core/registry.h
+    PRIVATE EMA/core/utils.c
+    PRIVATE EMA/core/utils.h
     # plugins
     PRIVATE EMA/plugins/plugin_rapl.c
     PRIVATE EMA/plugins/plugin_rapl.h

@@ -10,6 +10,7 @@
 #include <EMA/core/device.h>
 #include <EMA/core/plugin.h>
 #include <EMA/core/registry.h>
+#include <EMA/core/utils.h>
 
 #define RAPL_MAX 128
 
@@ -375,21 +376,24 @@ int rapl_plugin_init(Plugin* plugin)
         }
     }
 
-    if( count_devices == 0 )
-    {
-        free(devices.array);
-        RAPL_HANDLE_ERR(1, "No RAPL device detected.\n");
-    }
-
     /* Shrink array to finally needed size. */
     devices.size = count_devices;
-    devices.array = realloc(devices.array, sizeof(Device) * devices.size);
+    devices.array = realloc_s(devices.array, sizeof(Device) * devices.size);
 
     /* Set plugin data. */
     RaplPluginData* p_data = malloc(sizeof(RaplPluginData));
     p_data->devices = devices;
 
     plugin->data = p_data;
+
+    /* No access to RAPL devices. */
+    if( count_devices == 0 && count_all_rapl_zones() > 0 )
+        RAPL_HANDLE_ERR(1, "No access to RAPL devices.\n");
+
+    /* No RAPL devices available. */
+    if( count_devices == 0 )
+        RAPL_HANDLE_ERR(0, "No RAPL devices detected.\n");
+
     return 0;
 }
 

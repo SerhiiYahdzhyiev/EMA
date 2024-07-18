@@ -14,7 +14,7 @@ if 'CLANG_LIBRARY_FILE' in os.environ:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = 'EMA'
-copyright = '2023, PERFACCT GmbH'
+copyright = '2024, PERFACCT GmbH'
 author = 'Danny Puhan, Johannes Spazier'
 
 # -- General configuration ---------------------------------------------------

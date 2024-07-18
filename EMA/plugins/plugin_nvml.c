@@ -1,9 +1,11 @@
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 
 #include <nvml.h>
 
 #include <EMA/core/device.h>
+#include <EMA/core/overflow.h>
 #include <EMA/core/plugin.h>
 #include <EMA/core/registry.h>
 #include <EMA/utils/error.h>
@@ -100,7 +102,6 @@ NvmlDeviceData* init_nvml_device(unsigned idx)
 /* ****************************************************************************
 **** Plugin interface
 **************************************************************************** */
-
 static
 int nvml_plugin_init(Plugin* plugin)
 {
@@ -131,6 +132,11 @@ int nvml_plugin_init(Plugin* plugin)
 
         /* Keep default name on change. */
         devices.array[i].name = d_data->name;
+
+        /* Init overflow handling. */
+        int ret = EMA_init_overflow(&devices.array[i]);
+        ASSERT_MSG_OR_1(!ret, "Failed to register overflow handling.");
+
     }
 
     /* Set plugin data. */
@@ -146,6 +152,18 @@ DeviceArray nvml_plugin_get_devices(const Plugin* plugin)
 {
     NvmlPluginData* p_data = plugin->data;
     return p_data->devices;
+}
+
+static
+unsigned long long nvml_plugin_get_energy_update_interval(const Device* device)
+{
+    return 0;
+}
+
+static
+unsigned long long nvml_plugin_get_energy_max(const Device* device)
+{
+    return ULLONG_MAX;
 }
 
 static
@@ -177,6 +195,7 @@ int nvml_plugin_finalize(Plugin* plugin)
     DeviceArray devices = p_data->devices;
     for(int i = 0; i < devices.size; i++)
     {
+        EMA_finalize_overflow(&devices.array[i]);
         NvmlDeviceData* d_data = devices.array[i].data;
         free(d_data->name);
         free(d_data);
@@ -191,7 +210,6 @@ int nvml_plugin_finalize(Plugin* plugin)
 /* ****************************************************************************
 **** Extern
 **************************************************************************** */
-
 Plugin* create_nvml_plugin(const char* name)
 {
     Plugin* plugin = malloc(sizeof(Plugin));
@@ -199,6 +217,9 @@ Plugin* create_nvml_plugin(const char* name)
 
     plugin->cbs.init = nvml_plugin_init;
     plugin->cbs.get_devices = nvml_plugin_get_devices;
+    plugin->cbs.get_energy_update_interval =
+        nvml_plugin_get_energy_update_interval;
+    plugin->cbs.get_energy_max = nvml_plugin_get_energy_max;
     plugin->cbs.get_energy_uj = nvml_plugin_get_energy_uj;
     plugin->cbs.finalize = nvml_plugin_finalize;
     plugin->data = NULL;

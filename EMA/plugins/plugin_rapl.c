@@ -4,16 +4,19 @@
 
 #include <ctype.h>  // isdigit
 #include <dirent.h>  // dirent, opendir(), readdir, closedir()
+#include <errno.h>
 #include <linux/limits.h>
 #include <unistd.h>  // access, F_OK, R_OK
 
 #include <EMA/core/device.h>
+#include <EMA/core/overflow.h>
 #include <EMA/core/plugin.h>
 #include <EMA/core/registry.h>
 #include <EMA/core/utils.h>
 #include <EMA/utils/error.h>
 
 #define RAPL_MAX 128
+#define MAX_POWER_CONSTRAINTS 3
 
 #define CONCAT(var, format, ...) \
     snprintf(var, PATH_MAX, format, ##__VA_ARGS__)
@@ -39,6 +42,8 @@ typedef struct
     void* zone;
     char* name;
     char* energy_zone;
+    unsigned long long max_range;
+    unsigned long long energy_update_interval_ms;
     int package;
     int has_read_perm;
 } RaplDeviceData;
@@ -145,7 +150,7 @@ int _file_has_read_perm(const char* fname)
  * Return 1 on failure.
  */
 static
-int _read_rapl_value(const char* fname, char* value)
+int _read_rapl_file(const char* fname, char* value)
 {
     FILE* ptr = fopen(fname, "r");
     if( ptr == NULL )
@@ -161,6 +166,70 @@ int _read_rapl_value(const char* fname, char* value)
     return 0;
 }
 
+static
+unsigned long long _read_rapl_max_range(const char* zone)
+{
+    char max_range_zone[PATH_MAX];
+    char value_s[RAPL_MAX];
+
+    CONCAT(max_range_zone, "%s%s", zone, "/max_energy_range_uj");
+
+    int err = _read_rapl_file(max_range_zone, value_s);
+    if( err != 0 )
+        RAPL_HANDLE_ERR(0, "Could not read RAPL max_range.\n");
+
+    errno = 0;
+    unsigned long long value = strtoull(value_s, NULL, 10);
+    if( errno != 0 )
+        RAPL_HANDLE_ERR(
+            0, "Failed to convert RAPL max_range: %s\n", strerror(errno));
+
+    return value;
+}
+
+static
+unsigned long long _read_rapl_constraint_max_power_uw(const char* zone)
+{
+    // constraint_0, constraint_1, constraint_2 - long_term, short_term, peak
+    // No fixed mapping in general.
+    //      e.g. constraint_0, constraint_1 - long_term, peak
+
+    char max_power_zone[PATH_MAX];
+    char value_s[RAPL_MAX];
+    unsigned long long max_val = 0;
+
+    for(int i = 0; i < MAX_POWER_CONSTRAINTS; i++)
+    {
+        CONCAT(
+            max_power_zone,
+            "%s%s%d%s",
+            zone,
+            "/constraint_",
+            i,
+            "_max_power_uw"
+        );
+
+        if( !_file_exist(max_power_zone) )
+            continue;
+
+        int err = _read_rapl_file(max_power_zone, value_s);
+        if( err != 0 )
+            RAPL_HANDLE_ERR(0, "Could not read RAPL max_range.\n");
+
+        errno = 0;
+        unsigned long long value = strtoull(value_s, NULL, 10);
+        if( errno != 0 )
+            RAPL_HANDLE_ERR(
+                0,
+                "Failed to convert RAPL constraint max_power_uw: %s\n",
+                strerror(errno)
+            );
+        max_val = value > max_val ? value : max_val;
+    }
+
+    return max_val;
+}
+
 /**
  * Return -1 on internal failure,
  *         0 on success,
@@ -174,16 +243,16 @@ int _read_zone_name(const char *zone, char* name)
     int ret = CONCAT(name_zone, "%s%s", zone, "/name");
     int err;
 
-    if(ret < 0)
+    if( ret < 0 )
         RAPL_HANDLE_ERR(-1, "Creating name-zone string failed.\n");
 
-    if(!_file_exist(name_zone))
+    if( !_file_exist(name_zone) )
         RAPL_HANDLE_ERR(1, "RAPL is not supported.\n");
 
-    if(!_file_has_read_perm(name_zone))
+    if( !_file_has_read_perm(name_zone) )
         RAPL_HANDLE_ERR(2, "No read permissions for %s.\n", name_zone);
 
-    err = _read_rapl_value(name_zone, name);
+    err = _read_rapl_file(name_zone, name);
 
     /* Remove newline character. */
     name[strcspn(name, "\n")] = '\0';
@@ -233,6 +302,8 @@ RaplDeviceData *create_rapl_device(const char* zone, const char* sub_zone)
 {
     char name[RAPL_MAX];
     char energy_zone[PATH_MAX];
+    unsigned long long max_range, constraint_max_power;
+    unsigned long long energy_update_interval_ms;
     int ret;
 
     /* Prepare energy zone. */
@@ -262,12 +333,22 @@ RaplDeviceData *create_rapl_device(const char* zone, const char* sub_zone)
             return NULL;
     }
 
+    /* Prepare rapl_device. */
+    max_range = _read_rapl_max_range(zone);
+    if( max_range == 0 )
+        return NULL;
+
+    constraint_max_power = _read_rapl_constraint_max_power_uw(zone);
+    energy_update_interval_ms = 1000 * max_range / constraint_max_power;
+
     /* Setup rapl device. */
     RaplDeviceData *rapl_device = malloc(sizeof(RaplDeviceData));
     rapl_device->package = package_id;
     rapl_device->zone = sub_zone ? strdup(sub_zone) : strdup(zone);
     rapl_device->energy_zone = strdup(energy_zone);
     rapl_device->name = strdup(name);
+    rapl_device->max_range = max_range;
+    rapl_device->energy_update_interval_ms = energy_update_interval_ms;
     rapl_device->has_read_perm = has_read_perm;
 
     return rapl_device;
@@ -338,6 +419,8 @@ int rapl_plugin_init(Plugin* plugin)
         device->data = rapl_device;
         device->plugin = plugin;
         device->name = strdup(name);
+        ret = EMA_init_overflow(device);
+        ASSERT_MSG_OR_1(!ret, "Failed to register overflow handling.");
 
         /* Iterate rapl sub zones. */
         for(int j = 0; j < get_num_rapl_sub_zones(i); ++j)
@@ -370,6 +453,8 @@ int rapl_plugin_init(Plugin* plugin)
             device->data = rapl_sub_device;
             device->plugin = plugin;
             device->name = strdup(name);
+            ret = EMA_init_overflow(device);
+            ASSERT_MSG_OR_1(!ret, "Failed to register overflow handling.");
         }
     }
 
@@ -402,6 +487,20 @@ DeviceArray rapl_plugin_get_devices(const Plugin* plugin)
 }
 
 static
+unsigned long long rapl_get_energy_update_interval(const Device* device)
+{
+    RaplDeviceData* d_data = device->data;
+    return d_data->energy_update_interval_ms;
+}
+
+static
+unsigned long long rapl_get_energy_max(const Device* device)
+{
+    RaplDeviceData* d_data = device->data;
+    return d_data->max_range;
+}
+
+static
 unsigned long long rapl_plugin_get_energy_uj(const Device* device)
 {
     /*
@@ -412,11 +511,17 @@ unsigned long long rapl_plugin_get_energy_uj(const Device* device)
     RaplDeviceData* d_data = device->data;
 
     /* Existence of the file and read permission already checked. */
-    int err = _read_rapl_value(d_data->energy_zone, energy_str);
+    int err = _read_rapl_file(d_data->energy_zone, energy_str);
     if( err != 0 )
         RAPL_HANDLE_ERR(0, "Could not read RAPL energy value.\n");
 
-    return atoll(energy_str);
+    errno = 0;
+    unsigned long long energy = strtoull(energy_str, NULL, 10);
+    if( errno != 0 )
+        RAPL_HANDLE_ERR(
+            0, "Failed to convert RAPL energy: %s\n", strerror(errno));
+
+    return energy;
 }
 
 static
@@ -426,6 +531,7 @@ int rapl_plugin_finalize(Plugin* plugin)
     DeviceArray devices = p_data->devices;
     for(int i = 0; i < devices.size; i++)
     {
+        EMA_finalize_overflow(&devices.array[i]);
         free((void*)devices.array[i].name);
         free_rapl_device(devices.array[i].data);
     }
@@ -446,6 +552,8 @@ Plugin* create_rapl_plugin(const char* name)
 
     plugin->cbs.init = rapl_plugin_init;
     plugin->cbs.get_devices = rapl_plugin_get_devices;
+    plugin->cbs.get_energy_update_interval = rapl_get_energy_update_interval;
+    plugin->cbs.get_energy_max = rapl_get_energy_max;
     plugin->cbs.get_energy_uj = rapl_plugin_get_energy_uj;
     plugin->cbs.finalize = rapl_plugin_finalize;
     plugin->data = NULL;

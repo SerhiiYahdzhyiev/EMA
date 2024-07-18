@@ -3,12 +3,13 @@
 #include <unistd.h>
 
 #include <EMA/core/registry.h>
-#include <EMA/region/output.h>
-#include <EMA/region/region_store.h>
 #ifdef EMA_HAVE_NVML
     #include <EMA/plugins/plugin_nvml.h>
 #endif
 #include <EMA/plugins/plugin_rapl.h>
+#include <EMA/region/output.h>
+#include <EMA/region/region_store.h>
+
 #include "user.h"
 
 extern PluginRegistry registry;
@@ -35,6 +36,7 @@ int EMA_print_results()
 
     return 0;
 }
+
 
 /* Initialization and cleanup. */
 int EMA_init(EMA_init_cb callback)
@@ -80,6 +82,10 @@ int EMA_init(EMA_init_cb callback)
             registry.devices.array[k++] = &devices.array[j];
     }
 
+    err = start_overflow_tracking(&registry.devices);
+    if( err )
+        return err;
+
     return 0;
 }
 
@@ -88,6 +94,8 @@ int EMA_finalize()
     int ret = EMA_print_results();
     if( ret != 0 )
         return ret;
+
+    stop_overflow_tracking(&registry.devices);
 
     for(int i = 0; i < registry.plugins.size; ++i)
     {
@@ -130,7 +138,7 @@ unsigned long long EMA_get_energy_uj(const Device* device)
 
 unsigned long long EMA_plugin_get_energy_uj(const Device* device)
 {
-    return device->plugin->cbs.get_energy_uj(device);
+    return EMA_get_handled_energy_uj(device);
 }
 
 int EMA_plugin_finalize(Plugin* plugin)

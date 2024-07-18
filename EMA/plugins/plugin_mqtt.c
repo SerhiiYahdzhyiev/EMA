@@ -1,4 +1,5 @@
 #include <errno.h>
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -6,6 +7,7 @@
 #include <mosquitto.h>
 
 #include <EMA/core/device.h>
+#include <EMA/core/overflow.h>
 #include <EMA/core/plugin.h>
 #include <EMA/core/registry.h>
 #include <EMA/utils/error.h>
@@ -260,6 +262,10 @@ int mqtt_plugin_init(Plugin* plugin)
         devices.array[i].name = d_data->name;
         devices.array[i].data = d_data;
         devices.array[i].plugin = plugin;
+
+        /* Init overflow handling. */
+        int ret = EMA_init_overflow(&devices.array[i]);
+        ASSERT_MSG_OR_1(!ret, "Failed to register overflow handling.");
     }
     free(bytes);
 
@@ -280,6 +286,18 @@ DeviceArray mqtt_plugin_get_devices(const Plugin* plugin)
 }
 
 static
+unsigned long long mqtt_plugin_get_energy_update_interval(const Device* device)
+{
+    return 0;
+}
+
+static
+unsigned long long mqtt_plugin_get_energy_max(const Device* device)
+{
+    return ULLONG_MAX;
+}
+
+static
 unsigned long long mqtt_plugin_get_energy_uj(const Device* device)
 {
     return read_energy(device->data);
@@ -292,6 +310,7 @@ int mqtt_plugin_finalize(Plugin* plugin)
     DeviceArray devices = p_data->devices;
     for(size_t i = 0; i < devices.size; i++)
     {
+        EMA_finalize_overflow(&devices.array[i]);
         MqttDeviceData* d_data = devices.array[i].data;
         free(d_data->name);
         free(d_data->topic);
@@ -323,6 +342,9 @@ Plugin* create_mqtt_plugin(
 
     plugin->cbs.init = mqtt_plugin_init;
     plugin->cbs.get_devices = mqtt_plugin_get_devices;
+    plugin->cbs.get_energy_update_interval =
+        mqtt_plugin_get_energy_update_interval;
+    plugin->cbs.get_energy_max = mqtt_plugin_get_energy_max;
     plugin->cbs.get_energy_uj = mqtt_plugin_get_energy_uj;
     plugin->cbs.finalize = mqtt_plugin_finalize;
     plugin->data = config;

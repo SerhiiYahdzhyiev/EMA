@@ -25,6 +25,8 @@ target_sources(
     PRIVATE EMA/core/device.c
     PRIVATE EMA/core/device.h
     PUBLIC  EMA/core/device.user.h
+    PRIVATE EMA/core/overflow.c
+    PRIVATE EMA/core/overflow.h
     PRIVATE EMA/core/plugin.h
     PUBLIC  EMA/core/plugin.user.h
     PRIVATE EMA/core/registry.c

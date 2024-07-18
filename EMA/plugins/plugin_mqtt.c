@@ -8,12 +8,9 @@
 #include <EMA/core/device.h>
 #include <EMA/core/plugin.h>
 #include <EMA/core/registry.h>
+#include <EMA/utils/error.h>
 
 #define VERSION 0x1
-
-#define COND_RET(COND, RET) \
-    if( COND ) \
-        return RET;
 
 #define _MQTT_HANDLE_ERR(err, ret, format, ...) do { \
     if(err) { \
@@ -322,7 +319,7 @@ Plugin* create_mqtt_plugin(
     config->topic = topic;
 
     Plugin* plugin = malloc(sizeof(Plugin));
-    COND_RET(!plugin, NULL);
+    ASSERT_OR_NULL(plugin);
 
     plugin->cbs.init = mqtt_plugin_init;
     plugin->cbs.get_devices = mqtt_plugin_get_devices;
@@ -338,6 +335,6 @@ int register_mqtt_plugin(
     const char* name, const char* host, uint16_t port, const char* topic)
 {
     Plugin *plugin = create_mqtt_plugin(name, host, port, topic);
-    COND_RET(!plugin, 1);
+    ASSERT_OR_1(plugin);
     return EMA_register_plugin(plugin);
 }

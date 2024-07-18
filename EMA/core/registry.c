@@ -1,10 +1,8 @@
 #include <stdlib.h>
 
-#include "registry.h"
+#include <EMA/utils/error.h>
 
-#define ASSERT(COND, RET) \
-    if( !(COND) ) \
-        return RET;
+#include "registry.h"
 
 PluginRegistry registry = {
     .plugins = NULL,
@@ -15,7 +13,7 @@ int EMA_register_plugin(Plugin* plugin)
 {
     Plugin **mem = realloc(
         registry.plugins.array, (registry.plugins.size + 1) * sizeof(Plugin));
-    ASSERT(mem, 1);
+    ASSERT_OR_1(mem);
 
     registry.plugins.array = mem;
     registry.plugins.array[registry.plugins.size] = plugin;

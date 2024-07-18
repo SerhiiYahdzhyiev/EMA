@@ -11,15 +11,12 @@
 #include <EMA/core/plugin.h>
 #include <EMA/core/registry.h>
 #include <EMA/core/utils.h>
+#include <EMA/utils/error.h>
 
 #define RAPL_MAX 128
 
 #define CONCAT(var, format, ...) \
     snprintf(var, PATH_MAX, format, ##__VA_ARGS__)
-
-#define COND_RET(COND, RET) \
-    if( COND ) \
-        return RET;
 
 #define _RAPL_HANDLE_ERR(ret, msg, ...) do { \
     fprintf(stderr , msg, ##__VA_ARGS__); \
@@ -445,7 +442,7 @@ int rapl_plugin_finalize(Plugin* plugin)
 Plugin* create_rapl_plugin(const char* name)
 {
     Plugin* plugin = malloc(sizeof(Plugin));
-    COND_RET(!plugin, NULL)
+    ASSERT_OR_NULL(plugin);
 
     plugin->cbs.init = rapl_plugin_init;
     plugin->cbs.get_devices = rapl_plugin_get_devices;
@@ -460,6 +457,6 @@ Plugin* create_rapl_plugin(const char* name)
 int register_rapl_plugin()
 {
     Plugin *plugin = create_rapl_plugin("RAPL");
-    COND_RET(!plugin, 1);
+    ASSERT_OR_1(plugin);
     return EMA_register_plugin(plugin);
 }

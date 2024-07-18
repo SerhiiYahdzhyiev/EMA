@@ -47,6 +47,7 @@ target_sources(
     PRIVATE EMA/region/region.h
     PUBLIC  EMA/region/region.user.h
     # utils
+    PRIVATE EMA/utils/error.h
     PRIVATE EMA/utils/time.c
     PRIVATE EMA/utils/time.h
     PUBLIC  EMA/utils/time.user.h

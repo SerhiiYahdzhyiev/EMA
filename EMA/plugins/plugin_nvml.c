@@ -6,10 +6,7 @@
 #include <EMA/core/device.h>
 #include <EMA/core/plugin.h>
 #include <EMA/core/registry.h>
-
-#define COND_RET(COND, RET) \
-    if( COND ) \
-        return RET;
+#include <EMA/utils/error.h>
 
 #define _NVML_HANDLE_ERR(err, ret, format, ...) do { \
         if(err) { \
@@ -198,7 +195,7 @@ int nvml_plugin_finalize(Plugin* plugin)
 Plugin* create_nvml_plugin(const char* name)
 {
     Plugin* plugin = malloc(sizeof(Plugin));
-    COND_RET(!plugin, NULL)
+    ASSERT_OR_NULL(plugin);
 
     plugin->cbs.init = nvml_plugin_init;
     plugin->cbs.get_devices = nvml_plugin_get_devices;
@@ -213,6 +210,6 @@ Plugin* create_nvml_plugin(const char* name)
 int register_nvml_plugin()
 {
     Plugin *plugin = create_nvml_plugin("NVML");
-    COND_RET(!plugin, 1);
+    ASSERT_OR_1(plugin);
     return EMA_register_plugin(plugin);
 }

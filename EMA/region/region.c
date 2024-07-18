@@ -4,16 +4,13 @@
 #include <EMA/core/device.h>
 #include <EMA/core/registry.h>
 #include <EMA/user.h>
+#include <EMA/utils/error.h>
 #include <EMA/utils/time.h>
+
 #include "filter.h"
 #include "region.h"
 #include "region_store.h"
 
-#define ASSERT(COND, RET) \
-    if( !(COND) ) \
-        return RET;
-
-#define ASSERT_1(COND) ASSERT(COND, 1)
 
 extern PluginRegistry registry;
 
@@ -110,13 +107,13 @@ int EMA_region_define(
         return 0;
 
     err = EMA_thread_init();
-    ASSERT_1(err == 0);
+    ASSERT_OR_1(err == 0);
 
     err = EMA_region_create_and_init(region, idf, filter, file, line, func);
-    ASSERT_1(err == 0);
+    ASSERT_OR_1(err == 0);
 
     RegionStore* store = EMA_thread_get_region_store();
-    ASSERT_1(store);
+    ASSERT_OR_1(store);
 
     EMA_region_store_set(store, *region);
 

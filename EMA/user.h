@@ -51,7 +51,16 @@ int EMA_plugin_init(Plugin* plugin);
  *
  * @returns The `Devices` of the given `Plugin`.
  */
-DeviceArray EMA_get_plugin_devices(const Plugin* plugin);
+DevicePtrArray EMA_get_plugin_devices(const Plugin* plugin);
+
+/**
+ * This function reads the current energy value of a given `Device`.
+ *
+ * @param device: `Device` from which the energy value is to be read.
+ *
+ * @returns The current energy value in micro joules of the given `Device`.
+ */
+unsigned long long EMA_get_energy_uj(const Device* device);
 
 /**
  * This function reads the current energy value of a given `Device`.

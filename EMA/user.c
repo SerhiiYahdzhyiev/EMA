@@ -66,7 +66,7 @@ int EMA_init(EMA_init_cb callback)
         if( err )
             continue;
 
-        DeviceArray devices = EMA_get_plugin_devices(plugin);
+        DeviceArray devices = plugin->cbs.get_devices(plugin);
         registry.devices.size += devices.size;
     }
 
@@ -75,7 +75,7 @@ int EMA_init(EMA_init_cb callback)
     for(size_t i = 0; i < registry.plugins.size; ++i)
     {
         Plugin *plugin = registry.plugins.array[i];
-        DeviceArray devices = EMA_get_plugin_devices(plugin);
+        DeviceArray devices = plugin->cbs.get_devices(plugin);
         for(size_t j = 0; j < devices.size; ++j)
             registry.devices.array[k++] = &devices.array[j];
     }
@@ -112,9 +112,20 @@ int EMA_plugin_init(Plugin* plugin)
     return plugin->cbs.init(plugin);
 }
 
-DeviceArray EMA_get_plugin_devices(const Plugin* plugin)
+DevicePtrArray EMA_get_plugin_devices(const Plugin* plugin)
 {
-    return plugin->cbs.get_devices(plugin);
+    DeviceArray devices = plugin->cbs.get_devices(plugin);
+    DevicePtrArray device_ptrs;
+    device_ptrs.size = devices.size;
+    device_ptrs.array = malloc(device_ptrs.size * sizeof(Device*));
+    for(int i = 0; i < device_ptrs.size; ++i)
+        device_ptrs.array[i] = devices.array + i;
+    return device_ptrs;
+}
+
+unsigned long long EMA_get_energy_uj(const Device* device)
+{
+    return device->plugin->cbs.get_energy_uj(device);
 }
 
 unsigned long long EMA_plugin_get_energy_uj(const Device* device)

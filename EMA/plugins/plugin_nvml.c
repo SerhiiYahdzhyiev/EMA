@@ -8,15 +8,16 @@
 #include <EMA/core/overflow.h>
 #include <EMA/core/plugin.h>
 #include <EMA/core/registry.h>
+#include <EMA/core/utils.h>
 #include <EMA/utils/error.h>
 
 #define _NVML_HANDLE_ERR(err, ret, format, ...) do { \
-        if(err) { \
-            fprintf(stderr, format, ##__VA_ARGS__); \
-            nvml_shutdown(); \
-            return ret; \
-        } \
-    } while(0)
+    if(err) { \
+        fprintf(stderr, format, ##__VA_ARGS__); \
+        nvml_shutdown(); \
+        return ret; \
+    } \
+} while(0)
 
 #define NVML_HANDLE_ERR(err, format, ...) \
     _NVML_HANDLE_ERR(err, , format, ##__VA_ARGS__)
@@ -105,8 +106,16 @@ NvmlDeviceData* init_nvml_device(unsigned idx)
 static
 int nvml_plugin_init(Plugin* plugin)
 {
-    DeviceArray devices;
+    /* Init plugin data. */
+    NvmlPluginData* p_data = malloc(sizeof(NvmlPluginData));
+    p_data->devices.size = 0;
+    p_data->devices.array = NULL;
+    plugin->data = p_data;
+
     nvmlReturn_t err;
+    DeviceArray devices;
+    unsigned int k = 0; /* accessable device count */
+    unsigned int device_count = 0;
 
     /* Initialize NVML. */
     err = nvmlInit();
@@ -114,36 +123,46 @@ int nvml_plugin_init(Plugin* plugin)
         err, "NVML initialization failed: %s\n", nvmlErrorString(err));
 
     /* Set device count. */
-    unsigned int device_count = 0;
     err = nvmlDeviceGetCount(&device_count);
     NVML_HANDLE_ERR_RET_1(
         err, "Could not query device count: %s\n", nvmlErrorString(err));
-    devices.size = device_count;
 
     /* Init devices. */
+    devices.size = device_count;
     devices.array = malloc(sizeof(Device)*devices.size);
     for(int i = 0; i < devices.size; i++)
     {
         NvmlDeviceData* d_data = init_nvml_device(i);
+        if(d_data == NULL)
+            continue;
 
         /* Set device array. */
-        devices.array[i].data = d_data;
-        devices.array[i].plugin = plugin;
+        devices.array[k].data = d_data;
+        devices.array[k].plugin = plugin;
 
         /* Keep default name on change. */
-        devices.array[i].name = d_data->name;
+        devices.array[k].name = d_data->name;
 
         /* Init overflow handling. */
-        int ret = EMA_init_overflow(&devices.array[i]);
-        ASSERT_MSG_OR_1(!ret, "Failed to register overflow handling.");
-
+        int ret = EMA_init_overflow(&devices.array[k]);
+        NVML_HANDLE_ERR_RET_1(ret, "Failed to register overflow handling.");
+        ++k;
     }
 
-    /* Set plugin data. */
-    NvmlPluginData* p_data = malloc(sizeof(NvmlPluginData));
+    /* Update device data. */
+    devices.size = k;
+    devices.array = realloc_s(devices.array, sizeof(Device) * devices.size);
+
+    /* Set plugin data devices. */
     p_data->devices = devices;
 
-    plugin->data = p_data;
+    /* No access to NVML devices. */
+    NVML_HANDLE_ERR_RET_1(
+        k == 0 && device_count > 0, "No access to NVML devices.\n");
+
+    /* No NVML devices available. */
+    NVML_HANDLE_ERR_RET_0(device_count == 0, "No NVML devices detected.\n");
+
     return 0;
 }
 

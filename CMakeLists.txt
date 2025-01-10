@@ -3,11 +3,11 @@ cmake_minimum_required(VERSION 3.17)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
-# NVML
-find_package(CUDAToolkit)
-
 # Threads
 find_package(Threads REQUIRED)
+
+# NVML
+find_package(CUDAToolkit)
 
 # MQTT
 find_package(Mosquitto)

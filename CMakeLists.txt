@@ -3,6 +3,9 @@ cmake_minimum_required(VERSION 3.17)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
+# Threads
+find_package(Threads REQUIRED)
+
 # NVML
 find_package(CUDAToolkit)
 
@@ -59,7 +62,7 @@ target_sources(
 )
 target_include_directories(EMA PRIVATE .)
 target_compile_definitions(EMA PRIVATE _GNU_SOURCE)
-target_link_libraries(EMA PRIVATE hashmap)
+target_link_libraries(EMA PRIVATE hashmap Threads::Threads)
 
 if( CUDAToolkit_FOUND )
     # NVML plugin

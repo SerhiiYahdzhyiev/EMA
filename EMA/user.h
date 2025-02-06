@@ -102,6 +102,15 @@ const char* EMA_get_plugin_name(const Plugin* plugin);
  */
 const char* EMA_get_device_name(const Device* device);
 
+/**
+ * This function reads the unique identifier of a given `Device`.
+ *
+ * @param device: `Device` from which the uid is to be read.
+ *
+ * @returns The uid of the given `Device`.
+ */
+const char* EMA_get_device_uid(const Device* device);
+
 /* Global interface. */
 
 /**

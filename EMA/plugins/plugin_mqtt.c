@@ -114,7 +114,6 @@ uint16_t bytes_to_mqtt_device_data(uint8_t* buf, MqttDeviceData* d_data)
     offset += sizeof(uint64_t);
 
     d_data->name = byte_to_char_ptr(&buf[offset], len);
-    // TODO: Are the names guaranteed to be unique ??
     d_data->uid = byte_to_char_ptr(&buf[offset], len);
     offset += len;
 

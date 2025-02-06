@@ -158,7 +158,15 @@ This project is licensed under the terms of the BSD-3 license.
 See LICENSE.md
 
 # Authors/Contact
+
 | name | email |
 | ---- | ----- |
 | Johannes Spazier | spazier@perfacct.eu |
 | Danny Puhan | puhan@perfacct.eu |
+
+# External Contributors
+
+| name | email |
+| ---- | ----- |
+| Max Lübke | max.lubke@uni-potsdam.de |
+| Hannes Signer | hannes.signer@uni-potsdam.de |

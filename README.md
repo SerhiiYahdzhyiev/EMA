@@ -6,6 +6,9 @@ The EMA framework is a tool for profiling the energy consumption of
 self-defined code regions of HPC applications. It allows the integration of
 various energy measurement devices with the built-in plugin system.
 
+The development initialy started under [GreenHPC](https://greenhpc.eu)
+initiative.
+
 # Quickstart
 
 ## Installation

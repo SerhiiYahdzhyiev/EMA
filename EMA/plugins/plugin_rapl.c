@@ -417,8 +417,7 @@ int rapl_plugin_init(Plugin* plugin)
         }
 
         char uid[RAPL_UID_MAX];
-        // TODO: Remove `CPU-` prefix ??
-        snprintf(uid, RAPL_UID_MAX, "CPU-%d", rapl_device->package);
+        snprintf(uid, RAPL_UID_MAX, "%d", rapl_device->package);
 
         Device *device = devices.array + count_devices++;
         device->data = rapl_device;
@@ -456,8 +455,7 @@ int rapl_plugin_init(Plugin* plugin)
             }
 
             char suid[RAPL_UID_MAX];
-            // TODO: Remove `CPU-` prefix ??
-            snprintf(suid, RAPL_UID_MAX, "CPU-%d", rapl_sub_device->package);
+            snprintf(suid, RAPL_UID_MAX, "%d", rapl_sub_device->package);
 
             Device *device = devices.array + count_devices++;
             device->data = rapl_sub_device;

@@ -173,3 +173,17 @@ See LICENSE.md
 | ---- | ----- |
 | Max Lübke | max.lubke@uni-potsdam.de |
 | Hannes Signer | hannes.signer@uni-potsdam.de |
+
+# Funding
+
+The development of EMA was funded by the BMBF Germany in the context of the
+[NAAICE](https://gauss-allianz.de/en/project/title/NAAICE) project
+([GreenHPC grant](https://gauss-allianz.de/en/project/call/Richtlinie%20zur%20F%C3%B6rderung%20von%20Verbundprojekten%20auf%20dem%20Gebiet%20des%20energieeffizienten%20High-%E2%80%8BPerformance%20Computings%20%28GreenHPC%29)).
+
+<div align=center>
+  <img
+    src="https://raw.githubusercontent.com/wiki/RRZE-HPC/likwid/images/BMBF.png"
+    alt="BMBF logo"
+    width="150"
+  />
+</div>

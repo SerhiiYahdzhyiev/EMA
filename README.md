@@ -1,15 +1,21 @@
-# **EMA - Energy Measurement for Applications**
+# EMA - Energy Measurement for Applications
 
-# What is EMA?
-
-The EMA framework is a tool for profiling the energy consumption of
-self-defined code regions of HPC applications. It allows the integration of
-various energy measurement devices with the built-in plugin system.
+The EMA framework is a tool for measuring energy consumption of applications.
+It allows the integration of various energy measurement devices with the
+built-in plugin system. It also allows users to define measurement regions
+directly in the source code.
 
 The development initialy started under [GreenHPC](https://greenhpc.eu)
 initiative.
 
-# Quickstart
+## Table of Contents
+
+1. [Installation](#installation)
+2. [Usage](#usage)
+3. [Authors](#authors)
+4. [External Contributors](#external-contributors)
+5. [License](#license)
+6. [Funding](#funding)
 
 ## Installation
 
@@ -155,26 +161,27 @@ measurement results per region and device.
 | energy | Measured energy consumption in uJ (micro joules). |
 | time | Measured duration in us (micro seconds). |
 
-# License
-
-This project is licensed under the terms of the BSD-3 license.
-See LICENSE.md
-
-# Authors/Contact
+## Authors
 
 | name | email |
 | ---- | ----- |
 | Johannes Spazier | spazier@perfacct.eu |
 | Danny Puhan | puhan@perfacct.eu |
+| Serhii Yahdzhyiev | yahdzhyiev@perfacct.eu |
 
-# External Contributors
+## External Contributors
 
 | name | email |
 | ---- | ----- |
 | Max Lübke | max.lubke@uni-potsdam.de |
 | Hannes Signer | hannes.signer@uni-potsdam.de |
 
-# Funding
+## License
+
+This project is licensed under the terms of the BSD-3 license.
+See LICENSE.md
+
+## Funding
 
 The development of EMA was funded by the BMBF Germany in the context of the
 [NAAICE](https://gauss-allianz.de/en/project/title/NAAICE) project

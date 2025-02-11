@@ -33,6 +33,17 @@ allowing users to do following actions:
 
 *You will find more details in [Usage](#usage) section.*
 
+### Plugins
+
+Current version comes with the following plugins:
+
+   - [RAPL](https://www.intel.com/content/www/us/en/developer/articles/technical/software-security-guidance/advisory-guidance/running-average-power-limit-energy-reporting.html)
+     plugin (CPUs)
+   - [NVML](https://developer.nvidia.com/management-library-nvml) plugin
+     (Nvidia GPUs)
+   - [MQTT](https://en.wikipedia.org/wiki/MQTT) plugin (Custom hardware setups
+     over network)
+
 ## Installation
 
 ### Prerequisites

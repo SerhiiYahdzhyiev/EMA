@@ -22,8 +22,9 @@ initiative.
 
 EMA is designed to provide user-friendly API's for measuring the energy
 consumption and/or individual energy values in arbitrary applications. It
-provides sets of predefined high level macros and more low level functions
+provides sets of predefined *High Level* macros and more *Low Level* functions
 allowing users to do following actions:
+
    - define measurement regions in the source code of users applications
    - filter measured devices
    - filter plugins
@@ -35,7 +36,13 @@ allowing users to do following actions:
 
 ### Plugins
 
-Current version comes with the following plugins:
+EMA `Plugins` encapsulate realization details of energy measurements. They have
+a well-defined interface which is the part of EMA's core. EMA's extesibility is
+based on `Plugins` as well: users can write their own plugins to add support
+for new hardware devices or extend/fix/modify measurements realization for
+existing ones.
+
+Current version comes with the following pre-developed plugins:
 
    - [RAPL](https://www.intel.com/content/www/us/en/developer/articles/technical/software-security-guidance/advisory-guidance/running-average-power-limit-energy-reporting.html)
      plugin (CPUs)

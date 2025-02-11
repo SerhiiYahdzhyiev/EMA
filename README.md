@@ -10,12 +10,28 @@ initiative.
 
 ## Table of Contents
 
-1. [Installation](#installation)
-2. [Usage](#usage)
-3. [Authors](#authors)
-4. [External Contributors](#external-contributors)
-5. [License](#license)
-6. [Funding](#funding)
+1. [Overview](#overview)
+2. [Installation](#installation)
+3. [Usage](#usage)
+4. [Authors](#authors)
+5. [External Contributors](#external-contributors)
+6. [License](#license)
+7. [Funding](#funding)
+
+## Overview
+
+EMA is designed to provide user-friendly API's for measuring the energy
+consumption and/or individual energy values in arbitrary applications. It
+provides sets of predefined high level macros and more low level functions
+allowing users to do following actions:
+   - define measurement regions in the source code of users applications
+   - filter measured devices
+   - filter plugins
+   - control the outputs of measurements
+   - get individual energy and/or time values in arbitrary locations of
+     applications source code
+
+*You will find more details in [Usage](#usage) section.*
 
 ## Installation
 
@@ -44,6 +60,8 @@ initiative.
    ```bash
    make
    ```
+
+   *NOTE: This command will also build test executables from `tests` directory.*
 
 5. Install:
 

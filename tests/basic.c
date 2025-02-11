@@ -8,21 +8,21 @@
 
 int main(int argc, char **argv)
 {
-    printf("Init\n");
+    printf("Initializing EMA...\n");
     int err = EMA_init(NULL);
     if( err )
     {
-        printf("Error: %d\n", err);
+        printf("Failed to initialize EMA: %d\n", err);
         return 1;
     }
 
     PluginPtrArray plugins = EMA_get_plugins();
-    printf("Num plugins: %lu\n", plugins.size);
+    printf("Number of plugins: %lu\n", plugins.size);
     for(size_t i = 0; i < plugins.size; ++i)
         printf("Plugin %lu: %s\n", i, EMA_get_plugin_name(plugins.array[i]));
 
     DevicePtrArray devices = EMA_get_devices();
-    printf("Num devices: %lu\n", devices.size);
+    printf("Number of devices: %lu\n", devices.size);
     for(size_t i = 0; i < devices.size; ++i)
         printf("Device %lu: %s\n", i, EMA_get_device_name(devices.array[i]));
 
@@ -32,14 +32,13 @@ int main(int argc, char **argv)
     /* Lower-level API. */
     printf("Region 1\n");
     static thread_local Region *region = NULL;
-    EMA_region_create_and_init(&region, "r1", filter, "", 0, "");
+    EMA_region_define(&region, "r1", filter, "", 0, "");
 
     EMA_region_begin(region);
 
     sleep(2);
 
     EMA_region_end(region);
-    EMA_region_finalize(region);
 
     /* Higher-level API. */
     printf("Region 2\n");
@@ -51,14 +50,18 @@ int main(int argc, char **argv)
     sleep(2);
 
     EMA_REGION_END(region2);
-
+   
     EMA_filter_finalize(filter);
 
-    printf("Output 2\n");
+    printf("Output:\n");
     EMA_print_all(stdout);
 
-    printf("Finalize\n");
-    EMA_finalize();
+    printf("Finalizing EMA...\n");
+    err = EMA_finalize();
+    if (err) {
+        printf("Failed to finalize EMA: %d\n", err);
+        return 1;
+    }
 
     return 0;
 }

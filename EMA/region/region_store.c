@@ -66,6 +66,7 @@ int EMA_region_store_finalize(RegionStore* store)
     int err = 0;
     hashmap_iterate(store->hashmap, _EMA_region_finalize_iterator, &err);
     hashmap_free(store->hashmap);
+    free(store);
     return err;
 }
 

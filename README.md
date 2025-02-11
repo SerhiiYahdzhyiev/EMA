@@ -53,11 +53,11 @@ Current version comes with the following pre-developed plugins:
 
 ## Installation
 
-### Prerequisites
+### Base Prerequisites
 
    - [CMake](https://cmake.org)
 
-### Steps
+### General Steps
 
 1. [Clone the repository](https://graphite.dev/guides/how-to-clone-a-git-repository-with-git-clone) and navigate to its root directory.
 
@@ -93,6 +93,30 @@ Current version comes with the following pre-developed plugins:
    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:<EMA_install_dir>/lib
    ```
 
+### MQTT Plugin
+
+#### Prerequisites
+
+- [Mosquitto](https://mosquitto.org/man/libmosquitto-3.html)
+
+#### Instructions
+
+*TODO: Write...*
+
+### Documentation
+
+This project uses [Sphinx](https://www.sphinx-doc.org/en/master/) for building
+documentation.
+
+#### Prerequisites
+
+- [Python 3](https://python.org)
+- Python [Environment Manager](https://www.daytona.io/dotfiles/the-ultimate-guide-to-managing-python-environments)
+- [Clang]()
+
+#### Steps
+
+*TODO: Write...*
 
 ## Usage
 

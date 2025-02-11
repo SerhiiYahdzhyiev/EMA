@@ -19,36 +19,44 @@ initiative.
 
 ## Installation
 
-**Build from tarball**
-```
-tar -xf <filename>.tar.gz
-mkdir <filename>/build
-cd <filename>/build
-cmake .. \
-  -DCMAKE_BUILD_TYPE=Release \
-  -DCMAKE_INSTALL_PREFIX=<install_dir>
-make install
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:<install_dir>/lib
-```
+### Prerequisites
 
-**Build from git checkout**
-```
-git clone <URL>
-mkdir <filename>/build
-cd <filename>/build
-cmake .. \
-  -DCMAKE_BUILD_TYPE=Release \
-  -DCMAKE_INSTALL_PREFIX=<install_dir>
-make install
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:<install_dir>/lib
-```
+   - [CMake](https://cmake.org)
 
-## Accessing RAPL values
+### Steps
 
-After every system start, the system administrator need to set read permissions
-for users/groups to access the following files:
-  - /sys/class/powercap/intel-rapl:<socket>/energy_uj
-  - /sys/class/powercap/intel-rapl:<socket>:<rapl_device>/energy_uj
+1. [Clone the repository](https://graphite.dev/guides/how-to-clone-a-git-repository-with-git-clone) and navigate to its root directory.
+
+2. Create `build` directory and navigate to it:
+
+   ```bash
+   mkdir build && cd build
+   ```
+
+3. Configure and generate build files.
+
+   There are plenty of ways how you can do this, if you're not familiar with
+   [CMake](https://cmake.org) check out [this guide](https://preshing.com/20170511/how-to-build-a-cmake-based-project/),
+   or you can also go through related sections of [official documentation](https://cmake.org/documentation/).
+
+4. Build EMA:
+
+   ```bash
+   make
+   ```
+
+5. Install:
+
+   ```bash
+   make install
+   ```
+
+6. Update `LD_LIBRARY_PATH`:
+
+   ```bash
+   export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:<EMA_install_dir>/lib
+   ```
+
 
 ## Usage
 
@@ -160,6 +168,15 @@ measurement results per region and device.
 | device_name | Name of the device under measurement. |
 | energy | Measured energy consumption in uJ (micro joules). |
 | time | Measured duration in us (micro seconds). |
+
+### Troubleshooting
+
+#### Accessing RAPL values
+
+After every system start, the system administrator need to set read permissions
+for users/groups to access the following files:
+  - /sys/class/powercap/intel-rapl:<socket>/energy_uj
+  - /sys/class/powercap/intel-rapl:<socket>:<rapl_device>/energy_uj
 
 ## Authors
 

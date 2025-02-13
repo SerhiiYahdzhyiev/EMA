@@ -112,11 +112,15 @@ documentation.
 
 - [Python 3](https://python.org)
 - Python [Environment Manager](https://www.daytona.io/dotfiles/the-ultimate-guide-to-managing-python-environments)
-- [Clang]()
+- [Clang](https://clang.llvm.org/)
+- [Sphinx](https://www.sphinx-doc.org/en/master/)
+- [Sphinx C Autodoc](https://sphinx-c-autodoc.readthedocs.io/en/latest/)
 
 #### Steps
 
-*TODO: Write...*
+1. Setup Python environment, intstall and set up all dependencies.
+2. Navigate to the `docs` directory.
+3. Build desired type of documentation with `make`.
 
 ## Usage
 

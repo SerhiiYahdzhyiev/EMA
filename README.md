@@ -48,7 +48,7 @@ Current version comes with the following pre-developed plugins:
      plugin (CPUs)
    - [NVML](https://developer.nvidia.com/management-library-nvml) plugin
      (Nvidia GPUs)
-   - [MQTT](https://en.wikipedia.org/wiki/MQTT) plugin (Custom hardware setups
+   - [MQTT](https://mqtt.org) plugin (Custom hardware setups
      over network)
 
 ## Installation

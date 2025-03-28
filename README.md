@@ -260,6 +260,6 @@ The development of EMA is funded by the BMBF Germany in the context of the
   <img
     src="./assets/img/internet_in_farbe_de.jpg"
     alt="BMBF logo"
-    width="150"
+    width="250"
   />
 </div>

@@ -70,8 +70,7 @@ Current version comes with the following pre-developed plugins:
 3. Configure and generate build files.
 
    There are plenty of ways how you can do this, if you're not familiar with
-   [CMake](https://cmake.org) check out [this guide](https://preshing.com/20170511/how-to-build-a-cmake-based-project/),
-   or you can also go through related sections of [official documentation](https://cmake.org/documentation/).
+   [CMake](https://cmake.org) check out related sections of the [official documentation](https://cmake.org/documentation/).
 
 4. Build EMA:
 

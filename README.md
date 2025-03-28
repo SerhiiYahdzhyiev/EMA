@@ -5,7 +5,7 @@ It allows the integration of various energy measurement devices with the
 built-in plugin system. It also allows users to define measurement regions
 directly in the source code.
 
-The development initialy started under [GreenHPC](https://greenhpc.eu)
+The development was started under [GreenHPC](https://greenhpc.eu)
 initiative.
 
 ## Table of Contents
@@ -37,14 +37,14 @@ allowing users to do following actions:
 ### Plugins
 
 EMA `Plugins` encapsulate realization details of energy measurements. They have
-a well-defined interface which is the part of EMA's core. EMA's extesibility is
+a well-defined interface which is the part of EMA's core. EMA's flexibility is
 based on `Plugins` as well: users can write their own plugins to add support
 for new hardware devices or extend/fix/modify measurements realization for
 existing ones.
 
 Current version comes with the following pre-developed plugins:
 
-   - [RAPL](https://www.intel.com/content/www/us/en/developer/articles/technical/software-security-guidance/advisory-guidance/running-average-power-limit-energy-reporting.html)
+   - [RAPL](https://www.intel.de/content/dam/www/public/us/en/documents/manuals/64-ia-32-architectures-software-developer-vol-3b-part-2-manual.pdf)
      plugin (CPUs)
    - [NVML](https://developer.nvidia.com/management-library-nvml) plugin
      (Nvidia GPUs)
@@ -59,7 +59,7 @@ Current version comes with the following pre-developed plugins:
 
 ### General Steps
 
-1. [Clone the repository](https://graphite.dev/guides/how-to-clone-a-git-repository-with-git-clone) and navigate to its root directory.
+1. [Clone the repository](https://git-scm.com/docs/git-clone) and navigate to its root directory.
 
 2. Create `build` directory and navigate to it:
 
@@ -93,16 +93,6 @@ Current version comes with the following pre-developed plugins:
    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:<EMA_install_dir>/lib
    ```
 
-### MQTT Plugin
-
-#### Prerequisites
-
-- [Mosquitto](https://mosquitto.org/man/libmosquitto-3.html)
-
-#### Instructions
-
-*TODO: Write...*
-
 ### Documentation
 
 This project uses [Sphinx](https://www.sphinx-doc.org/en/master/) for building
@@ -111,14 +101,13 @@ documentation.
 #### Prerequisites
 
 - [Python 3](https://python.org)
-- Python [Environment Manager](https://www.daytona.io/dotfiles/the-ultimate-guide-to-managing-python-environments)
 - [Clang](https://clang.llvm.org/)
 - [Sphinx](https://www.sphinx-doc.org/en/master/)
 - [Sphinx C Autodoc](https://sphinx-c-autodoc.readthedocs.io/en/latest/)
 
 #### Steps
 
-1. Setup Python environment, intstall and set up all dependencies.
+1. Create Python environment, install and set up all dependencies.
 2. Navigate to the `docs` directory.
 3. Build desired type of documentation with `make`.
 
@@ -264,13 +253,13 @@ See LICENSE.md
 
 ## Funding
 
-The development of EMA was funded by the BMBF Germany in the context of the
+The development of EMA is funded by the BMBF Germany in the context of the
 [NAAICE](https://gauss-allianz.de/en/project/title/NAAICE) project
 ([GreenHPC grant](https://gauss-allianz.de/en/project/call/Richtlinie%20zur%20F%C3%B6rderung%20von%20Verbundprojekten%20auf%20dem%20Gebiet%20des%20energieeffizienten%20High-%E2%80%8BPerformance%20Computings%20%28GreenHPC%29)).
 
 <div align=center>
   <img
-    src="https://raw.githubusercontent.com/wiki/RRZE-HPC/likwid/images/BMBF.png"
+    src="./assets/img/internet_in_farbe_de.jpg"
     alt="BMBF logo"
     width="150"
   />

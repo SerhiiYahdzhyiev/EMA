@@ -243,7 +243,6 @@ for users/groups to access the following files:
 
 | name | email |
 | ---- | ----- |
-| Max Lübke | max.lubke@uni-potsdam.de |
 | Hannes Signer | hannes.signer@uni-potsdam.de |
 
 ## License

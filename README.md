@@ -241,8 +241,8 @@ The development of EMA is funded by the BMBF Germany in the context of the
 
 <div align=center>
   <img
-    src="./assets/img/internet_in_farbe_de.jpg"
-    alt="BMBF logo"
-    width="250"
+    src="./assets/img/BMBF-sponsored.jpg"
+    alt="Sponsored by the Federal Ministry of Education and Research"
+    width="300"
   />
 </div>

@@ -1,7 +1,7 @@
 CC = gcc
 
 CFLAGS = -I${EMA_INSTALL_DIR}/include -L${EMA_INSTALL_DIR}/lib
-LFlAGS = -lEMA
+LFLAGS = -lEMA
 
 all: measure
 

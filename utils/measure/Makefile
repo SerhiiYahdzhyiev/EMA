@@ -3,9 +3,9 @@ CC = gcc
 CFLAGS = -I${EMA_INSTALL_DIR}/include -L${EMA_INSTALL_DIR}/lib
 LFLAGS = -lEMA
 
-all: measure
+all: ema_measure
 
-measure: measure.c
+ema_measure: measure.c
 	$(CC) -g $^ $(CFLAGS) -o $@ $(LFLAGS)
 
 clean:

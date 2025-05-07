@@ -80,8 +80,8 @@ int main(int argc, char** argv) {
         return EXIT_FAILURE;
     }
 
-    fprintf(f, "Start: %s\n", ts_start);
-    fprintf(f, "End: %s\n", ts_end);
+    fprintf(f, "ts_start,ts_end\n");
+    fprintf(f, "%s,%s\n", ts_start, ts_end);
     fclose(f);
 
     return EXIT_SUCCESS;

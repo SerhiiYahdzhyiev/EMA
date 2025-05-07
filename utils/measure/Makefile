@@ -6,8 +6,8 @@ LFLAGS = -lEMA
 all: ema_measure
 
 ema_measure: measure.c
-	$(CC) -g $^ $(CFLAGS) -o $@ $(LFLAGS)
+	$(CC) -Wall -g $^ $(CFLAGS) -o $@ $(LFLAGS)
 
 clean:
 	rm output.EMA*
-	rm measure
+	rm ema_measure

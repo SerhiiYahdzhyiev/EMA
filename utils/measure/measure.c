@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <unistd.h>
+#include <stdlib.h>
 
 #include <EMA.h>
 
@@ -17,6 +17,14 @@ int main() {
     printl("Initiallizing EMA...");
     int err = EMA_init(NULL);
     HANDLE_ERROR(err);
+
+    EMA_REGION_DECLARE(region);
+    EMA_REGION_DEFINE(&region, "region");
+
+    system("sleep 5");
+
+    EMA_REGION_BEGIN(region);
+    EMA_REGION_END(region);
 
     printl("Finalizing EMA...");
     err = EMA_finalize();

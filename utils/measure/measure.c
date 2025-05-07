@@ -7,6 +7,8 @@
 
 #include <EMA.h>
 
+#define CMD_BUF_SIZE 65536 // 64 KB
+
 #define printl(MSG) do { printf(MSG "\n"); } while (0)
 
 #define HANDLE_ERROR(ERR) do { \
@@ -53,8 +55,7 @@ int main(int argc, char** argv) {
         return EXIT_FAILURE;
     }
 
-    char cmd[4096];
-    cmd[0] = '\0';
+    char cmd[CMD_BUF_SIZE] = {0};
     for (int i = 1; i < argc; i++) {
         append_quoted(cmd, argv[i]);
     }

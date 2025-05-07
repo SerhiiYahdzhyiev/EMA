@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <time.h>
 
 #include <EMA.h>
 
@@ -8,10 +10,21 @@
 #define HANDLE_ERROR(ERR) do { \
     if (ERR) { \
         printf("Error: %d\n", ERR); \
-        return 1; \
+        return EXIT_FAILURE; \
     } \
 } while (0)
 
+void iso_format(char* buffer, size_t buff_size, struct tm* timeinfo) {
+    strftime(buffer, buff_size, "%Y-%m-%dT%H:%M:%S", timeinfo);
+    snprintf(
+        buffer + strlen(buffer),
+        buff_size - strlen(buffer),
+        "%c%02d:%02d",
+        (timeinfo->tm_gmtoff >= 0 ? '+' : '-'),
+        abs(timeinfo->tm_gmtoff) / 3600,
+        (abs(timeinfo->tm_gmtoff) % 3600) / 60
+    );
+}
 
 int main(int argc, char** argv) {
     if (argc != 2) {
@@ -29,6 +42,17 @@ int main(int argc, char** argv) {
     int err = EMA_init(NULL);
     HANDLE_ERROR(err);
 
+    time_t rawtime;
+    struct tm* timeinfo;
+
+    char ts_start[64];
+    char ts_end[64];
+
+    time(&rawtime);
+    timeinfo = localtime(&rawtime);
+
+    iso_format(ts_start, 64, timeinfo);
+
     EMA_REGION_DECLARE(region);
     EMA_REGION_DEFINE(&region, "region");
 
@@ -36,10 +60,15 @@ int main(int argc, char** argv) {
 
     EMA_REGION_BEGIN(region);
     EMA_REGION_END(region);
+    
+    iso_format(ts_end, 64, timeinfo);
 
     printl("Finalizing EMA...");
     err = EMA_finalize();
     HANDLE_ERROR(err);
 
-    return 0;
+    printf("Start: %s\n", ts_start);
+    printf("End: %s\n", ts_end);
+
+    return EXIT_SUCCESS;
 }

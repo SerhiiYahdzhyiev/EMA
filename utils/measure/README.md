@@ -25,9 +25,4 @@ single measurement region.
 
 Make built executable (`ema_measure`) available in your `PATH` for convenience
 (this is completely optional you can invoke it as `./ema_measure`),
-then run it passing application execution commands as a single string
-argument, e.g `ema_measure 'sleep 10'`.
-
-Mind escaping the quotes if you your target application also requires quoted
-arguments, e.g. `ema_measure "your_app -arg 'some string argument for your
-app'"`.
+then run it passing application execution commands, e.g `ema_measure sleep 10`.

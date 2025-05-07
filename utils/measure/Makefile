@@ -9,5 +9,6 @@ ema_measure: measure.c
 	$(CC) -Wall -g $^ $(CFLAGS) -o $@ $(LFLAGS)
 
 clean:
+	rm timestamps.EMA*
 	rm output.EMA*
 	rm ema_measure

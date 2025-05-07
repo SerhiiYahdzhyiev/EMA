@@ -41,7 +41,7 @@ void append_quoted(char *dest, const char *src) {
 
     for (; *src; ++src) {
         if (*src == '"') {
-            strcat(dest, "\"\\\"\"");
+            strcat(dest, "\\\"");
         } else {
             strncat(dest, src, 1);
         }

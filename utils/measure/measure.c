@@ -16,7 +16,13 @@
     } \
 } while (0)
 
-void iso_format(char* buffer, size_t buff_size, struct tm* timeinfo) {
+void iso_format(char* buffer, size_t buff_size) {
+    time_t rawtime;
+    struct tm* timeinfo;
+
+    time(&rawtime);
+    timeinfo = localtime(&rawtime);
+
     strftime(buffer, buff_size, "%Y-%m-%dT%H:%M:%S", timeinfo);
     snprintf(
         buffer + strlen(buffer),
@@ -44,26 +50,22 @@ int main(int argc, char** argv) {
     int err = EMA_init(NULL);
     HANDLE_ERROR(err);
 
-    time_t rawtime;
-    struct tm* timeinfo;
 
     char ts_start[64];
     char ts_end[64];
 
-    time(&rawtime);
-    timeinfo = localtime(&rawtime);
-
-    iso_format(ts_start, 64, timeinfo);
+    iso_format(ts_start, 64);
 
     EMA_REGION_DECLARE(region);
     EMA_REGION_DEFINE(&region, "region");
 
+    EMA_REGION_BEGIN(region);
+
     system(cmd);
 
-    EMA_REGION_BEGIN(region);
     EMA_REGION_END(region);
     
-    iso_format(ts_end, 64, timeinfo);
+    iso_format(ts_end, 64);
 
     printl("Finalizing EMA...");
     err = EMA_finalize();

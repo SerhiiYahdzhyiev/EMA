@@ -7,3 +7,7 @@ all: measure
 
 measure: measure.c
 	$(CC) -g $^ $(CFLAGS) -o $@ $(LFLAGS)
+
+clean:
+	rm output.EMA*
+	rm measure

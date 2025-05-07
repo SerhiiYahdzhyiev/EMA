@@ -34,11 +34,17 @@ void get_iso_time(char* buffer, size_t buff_size) {
     );
 }
 
-void append(char *dest, const char *src) {
+void append_quoted(char *dest, const char *src) {
+    strcat(dest, "\"");
+
     for (; *src; ++src) {
-        strncat(dest, src, 1);
+        if (*src == '\"') {
+            strcat(dest, "\"\\\"\"");
+        } else {
+            strncat(dest, src, 1);
+        }
     }
-    strcat(dest, " ");
+    strcat(dest, "\" ");
 }
 
 int main(int argc, char** argv) {
@@ -50,7 +56,7 @@ int main(int argc, char** argv) {
     char cmd[4096];
     cmd[0] = '\0';
     for (int i = 1; i < argc; i++) {
-        append(cmd, argv[i]);
+        append_quoted(cmd, argv[i]);
     }
     printf("CMD: %s\n", cmd);
 

@@ -34,16 +34,24 @@ void iso_format(char* buffer, size_t buff_size) {
     );
 }
 
+void append(char *dest, const char *src) {
+    for (; *src; ++src) {
+        strncat(dest, src, 1);
+    }
+    strcat(dest, " ");
+}
+
 int main(int argc, char** argv) {
-    if (argc != 2) {
-        printl(
-            "USAGE: ema_measure <CMD>\n\n"
-            "CMD - execution command as a string (e.g. 'sleep 5')"
-        );
+    if (argc < 2) {
+        printl("USAGE: ema_measure CMD [args...]");
         return EXIT_FAILURE;
     }
 
-    char* cmd = argv[1];
+    char cmd[4096];
+    cmd[0] = '\0';
+    for (int i = 1; i < argc; i++) {
+        append(cmd, argv[i]);
+    }
     printf("CMD: %s\n", cmd);
 
     printl("Initiallizing EMA...");

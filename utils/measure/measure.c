@@ -40,7 +40,7 @@ void append_quoted(char *dest, const char *src) {
     strcat(dest, "\"");
 
     for (; *src; ++src) {
-        if (*src == '\"') {
+        if (*src == '"') {
             strcat(dest, "\"\\\"\"");
         } else {
             strncat(dest, src, 1);

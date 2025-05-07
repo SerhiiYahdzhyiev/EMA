@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <unistd.h>
 
 #include <EMA.h>
 
@@ -67,8 +68,20 @@ int main(int argc, char** argv) {
     err = EMA_finalize();
     HANDLE_ERROR(err);
 
-    printf("Start: %s\n", ts_start);
-    printf("End: %s\n", ts_end);
+    pid_t pid = getpid();
+
+    char filename[64];
+    snprintf(filename, 64, "timestamps.EMA.%u", pid);
+
+    FILE* f = fopen(filename, "w");
+    if (f == NULL) {
+        perror("Failed to open timestamps file!");
+        return EXIT_FAILURE;
+    }
+
+    fprintf(f, "Start: %s\n", ts_start);
+    fprintf(f, "End: %s\n", ts_end);
+    fclose(f);
 
     return EXIT_SUCCESS;
 }

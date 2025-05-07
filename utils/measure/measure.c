@@ -16,7 +16,7 @@
     } \
 } while (0)
 
-void iso_format(char* buffer, size_t buff_size) {
+void get_iso_time(char* buffer, size_t buff_size) {
     time_t rawtime;
     struct tm* timeinfo;
 
@@ -62,7 +62,7 @@ int main(int argc, char** argv) {
     char ts_start[64];
     char ts_end[64];
 
-    iso_format(ts_start, 64);
+    get_iso_time(ts_start, 64);
 
     EMA_REGION_DECLARE(region);
     EMA_REGION_DEFINE(&region, "region");
@@ -73,7 +73,7 @@ int main(int argc, char** argv) {
 
     EMA_REGION_END(region);
     
-    iso_format(ts_end, 64);
+    get_iso_time(ts_end, 64);
 
     printl("Finalizing EMA...");
     err = EMA_finalize();

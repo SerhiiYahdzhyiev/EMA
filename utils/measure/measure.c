@@ -72,7 +72,7 @@ int main(int argc, char** argv) {
         goto exit;
     }
 
-    cmd = calloc(0, sizeof(char) * arg_max);
+    cmd = calloc(arg_max, sizeof(char));
     if (!cmd) {
         perror("calloc");
         status = EXIT_FAILURE;
@@ -82,6 +82,7 @@ int main(int argc, char** argv) {
     for (int i = 1; i < argc; i++) {
         append_quoted(cmd, argv[i]);
     }
+
     printf("CMD: %s\n", cmd);
 
     printl("Initiallizing EMA...");

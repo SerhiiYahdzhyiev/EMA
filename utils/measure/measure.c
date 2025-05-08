@@ -10,6 +10,7 @@
 
 #define TS_BUF_SIZE 64
 #define OUT_FILENAME_SIZE 64
+#define PID_STR_BUF_SIZE 32
 
 #define printl(MSG) do { printf(MSG "\n"); } while (0)
 
@@ -59,6 +60,12 @@ int main(int argc, char** argv) {
     char ts_start[TS_BUF_SIZE];
     char ts_end[TS_BUF_SIZE];
 
+    pid_t pid = getpid();
+    char pidstr[PID_STR_BUF_SIZE];
+
+    snprintf(pidstr, PID_STR_BUF_SIZE, "%d", pid);
+    setenv("EMA_MEASURE_PID", pidstr, 1);
+
     if (argc < 2) {
         printl("USAGE: ema_measure CMD [args...]");
         status =  EXIT_FAILURE;
@@ -105,8 +112,6 @@ int main(int argc, char** argv) {
     printl("Finalizing EMA...");
     err = EMA_finalize();
     HANDLE_ERROR(err);
-
-    pid_t pid = getpid();
 
     char filename[OUT_FILENAME_SIZE];
     snprintf(filename, OUT_FILENAME_SIZE, "timestamps.EMA.%u", pid);

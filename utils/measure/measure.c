@@ -9,6 +9,7 @@
 
 #define CMD_BUF_SIZE 65536 // 64 KB
 #define TS_BUF_SIZE 64
+#define OUT_FILENAME_SIZE 64
 
 #define printl(MSG) do { printf(MSG "\n"); } while (0)
 
@@ -89,8 +90,8 @@ int main(int argc, char** argv) {
 
     pid_t pid = getpid();
 
-    char filename[64];
-    snprintf(filename, 64, "timestamps.EMA.%u", pid);
+    char filename[OUT_FILENAME_SIZE];
+    snprintf(filename, OUT_FILENAME_SIZE, "timestamps.EMA.%u", pid);
 
     FILE* f = fopen(filename, "w");
     if (f == NULL) {

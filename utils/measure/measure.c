@@ -8,6 +8,7 @@
 #include <EMA.h>
 
 #define CMD_BUF_SIZE 65536 // 64 KB
+#define TS_BUF_SIZE 64
 
 #define printl(MSG) do { printf(MSG "\n"); } while (0)
 
@@ -66,10 +67,10 @@ int main(int argc, char** argv) {
     HANDLE_ERROR(err);
 
 
-    char ts_start[64];
-    char ts_end[64];
+    char ts_start[TS_BUF_SIZE];
+    char ts_end[TS_BUF_SIZE];
 
-    get_iso_time(ts_start, 64);
+    get_iso_time(ts_start, TS_BUF_SIZE);
 
     EMA_REGION_DECLARE(region);
     EMA_REGION_DEFINE(&region, "region");
@@ -80,7 +81,7 @@ int main(int argc, char** argv) {
 
     EMA_REGION_END(region);
     
-    get_iso_time(ts_end, 64);
+    get_iso_time(ts_end, TS_BUF_SIZE);
 
     printl("Finalizing EMA...");
     err = EMA_finalize();

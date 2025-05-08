@@ -1,4 +1,5 @@
 #define _GNU_SOURCE
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -7,7 +8,6 @@
 
 #include <EMA.h>
 
-#define CMD_BUF_SIZE 65536 // 64 KB
 #define TS_BUF_SIZE 64
 #define OUT_FILENAME_SIZE 64
 
@@ -16,7 +16,8 @@
 #define HANDLE_ERROR(ERR) do { \
     if (ERR) { \
         printf("Error: %d\n", ERR); \
-        return EXIT_FAILURE; \
+        status = EXIT_FAILURE; \
+        goto exit; \
     } \
 } while (0)
 
@@ -52,12 +53,32 @@ void append_quoted(char *dest, const char *src) {
 }
 
 int main(int argc, char** argv) {
+    int status = EXIT_SUCCESS;
+    FILE* f = NULL;
+    char* cmd = NULL;
+    char ts_start[TS_BUF_SIZE];
+    char ts_end[TS_BUF_SIZE];
+
     if (argc < 2) {
         printl("USAGE: ema_measure CMD [args...]");
-        return EXIT_FAILURE;
+        status =  EXIT_FAILURE;
+        goto exit;
     }
 
-    char cmd[CMD_BUF_SIZE] = {0};
+    long arg_max = sysconf(_SC_ARG_MAX);
+    if (arg_max == -1) {
+        perror("sysconf");
+        status = EXIT_FAILURE;
+        goto exit;
+    }
+
+    cmd = calloc(0, sizeof(char));
+    if (!cmd) {
+        perror("calloc");
+        status = EXIT_FAILURE;
+        goto exit;
+    }
+
     for (int i = 1; i < argc; i++) {
         append_quoted(cmd, argv[i]);
     }
@@ -66,10 +87,6 @@ int main(int argc, char** argv) {
     printl("Initiallizing EMA...");
     int err = EMA_init(NULL);
     HANDLE_ERROR(err);
-
-
-    char ts_start[TS_BUF_SIZE];
-    char ts_end[TS_BUF_SIZE];
 
     get_iso_time(ts_start, TS_BUF_SIZE);
 
@@ -93,15 +110,20 @@ int main(int argc, char** argv) {
     char filename[OUT_FILENAME_SIZE];
     snprintf(filename, OUT_FILENAME_SIZE, "timestamps.EMA.%u", pid);
 
-    FILE* f = fopen(filename, "w");
+    f = fopen(filename, "w");
     if (f == NULL) {
         perror("Failed to open timestamps file!");
-        return EXIT_FAILURE;
+        status = EXIT_FAILURE;
+        goto exit;
     }
 
     fprintf(f, "ts_start,ts_end\n");
     fprintf(f, "%s,%s\n", ts_start, ts_end);
-    fclose(f);
 
-    return EXIT_SUCCESS;
+exit:
+    
+    if (cmd) free(cmd);
+    if (f) fclose(f);
+
+    return status;
 }

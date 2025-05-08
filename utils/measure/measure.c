@@ -72,7 +72,7 @@ int main(int argc, char** argv) {
         goto exit;
     }
 
-    cmd = calloc(0, sizeof(char));
+    cmd = calloc(0, sizeof(char) * arg_max);
     if (!cmd) {
         perror("calloc");
         status = EXIT_FAILURE;

@@ -11,17 +11,20 @@
 #define TS_BUF_SIZE 64
 #define OUT_FILENAME_SIZE 64
 
-#define printl(MSG) do { printf(MSG "\n"); } while (0)
+#define printl(MSG) do { printf(MSG "\n"); } while(0)
 
-#define HANDLE_ERROR(ERR) do { \
-    if (ERR) { \
+#define HANDLE_ERROR(ERR) do \
+{ \
+    if(ERR) \
+    { \
         printf("Error: %d\n", ERR); \
         status = EXIT_FAILURE; \
         goto exit; \
     } \
 } while (0)
 
-void get_iso_time(char* buffer, size_t buff_size) {
+void get_iso_time(char* buffer, size_t buff_size)
+{
     time_t rawtime;
     struct tm* timeinfo;
 
@@ -39,20 +42,26 @@ void get_iso_time(char* buffer, size_t buff_size) {
     );
 }
 
-void append_quoted(char *dest, const char *src) {
+void append_quoted(char *dest, const char *src)
+{
     strcat(dest, "\"");
 
-    for (; *src; ++src) {
-        if (*src == '"') {
+    for(; *src; ++src)
+    {
+        if (*src == '"')
+        {
             strcat(dest, "\\\"");
-        } else {
+        }
+        else
+        {
             strncat(dest, src, 1);
         }
     }
     strcat(dest, "\" ");
 }
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv)
+{
     int status = EXIT_SUCCESS;
     FILE* f = NULL;
     char* cmd = NULL;
@@ -61,27 +70,31 @@ int main(int argc, char** argv) {
 
     pid_t pid = getpid();
 
-    if (argc < 2) {
+    if(argc < 2)
+    {
         printl("USAGE: ema_measure CMD [args...]");
         status =  EXIT_FAILURE;
         goto exit;
     }
 
     long arg_max = sysconf(_SC_ARG_MAX);
-    if (arg_max == -1) {
+    if(arg_max == -1)
+    {
         perror("sysconf");
         status = EXIT_FAILURE;
         goto exit;
     }
 
     cmd = calloc(arg_max, sizeof(char));
-    if (!cmd) {
+    if(!cmd)
+    {
         perror("calloc");
         status = EXIT_FAILURE;
         goto exit;
     }
 
-    for (int i = 1; i < argc; i++) {
+    for(int i = 1; i < argc; i++)
+    {
         append_quoted(cmd, argv[i]);
     }
 
@@ -112,7 +125,8 @@ int main(int argc, char** argv) {
     snprintf(filename, OUT_FILENAME_SIZE, "timestamps.EMA.%u", pid);
 
     f = fopen(filename, "w");
-    if (f == NULL) {
+    if(f == NULL)
+    {
         perror("Failed to open timestamps file!");
         status = EXIT_FAILURE;
         goto exit;
@@ -123,8 +137,8 @@ int main(int argc, char** argv) {
 
 exit:
     
-    if (cmd) free(cmd);
-    if (f) fclose(f);
+    if(cmd) free(cmd);
+    if(f) fclose(f);
 
     return status;
 }

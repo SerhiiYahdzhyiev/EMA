@@ -66,7 +66,6 @@ int EMA_region_store_finalize(RegionStore* store)
     int err = 0;
     hashmap_iterate(store->hashmap, _EMA_region_finalize_iterator, &err);
     hashmap_free(store->hashmap);
-    free(store);
     return err;
 }
 
@@ -135,7 +134,9 @@ RegionStore* EMA_get_region_store(int thread_idx)
 
 int EMA_region_stores_finalize()
 {
-    for(size_t i = 0; i < EMA_thread_count; ++i)
+    for(size_t i = 0; i < EMA_thread_count; ++i) {
         EMA_region_store_finalize(EMA_region_store[i]);
+        free(EMA_region_store[i]);
+    }
     return 0;
 }

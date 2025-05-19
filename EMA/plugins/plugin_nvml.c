@@ -31,6 +31,8 @@
 #define NVML_HANDLE_ERR_RET_1(err, format, ...) \
     _NVML_HANDLE_ERR(err, 1, format, ##__VA_ARGS__)
 
+#define DEVICE_TYPE "gpu"
+
 /* ****************************************************************************
 **** Typedefs
 **************************************************************************** */
@@ -142,6 +144,8 @@ int nvml_plugin_init(Plugin* plugin)
 
         /* Keep default name on change. */
         devices.array[k].name = d_data->name;
+
+        devices.array[k].type = strdup(DEVICE_TYPE);
 
         /* Init overflow handling. */
         int ret = EMA_init_overflow(&devices.array[k]);

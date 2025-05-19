@@ -102,6 +102,15 @@ const char* EMA_get_plugin_name(const Plugin* plugin);
  */
 const char* EMA_get_device_name(const Device* device);
 
+/**
+ * This function reads the type of a given `Device`.
+ *
+ * @param device: `Device` from which the type is to be read.
+ *
+ * @returns The type of the given `Device` (e.g. cpu, gpu, misc).
+ */
+const char* EMA_get_device_type(const Device* device);
+
 /* Global interface. */
 
 /**

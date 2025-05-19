@@ -10,6 +10,7 @@ typedef struct Device
 {
     Plugin* plugin;
     const char *name;
+    const char *type;
     void *data;
     OverflowData overflow;
 } Device;

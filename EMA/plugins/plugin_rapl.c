@@ -29,6 +29,8 @@
 #define RAPL_HANDLE_ERR(ret, msg, ...) \
     _RAPL_HANDLE_ERR(ret, msg,  ##__VA_ARGS__)
 
+#define DEVICE_TYPE "cpu"
+
 /* ****************************************************************************
 **** Typedefs
 **************************************************************************** */
@@ -419,6 +421,7 @@ int rapl_plugin_init(Plugin* plugin)
         device->data = rapl_device;
         device->plugin = plugin;
         device->name = strdup(name);
+        device->type = strdup(DEVICE_TYPE);
         ret = EMA_init_overflow(device);
         ASSERT_MSG_OR_1(!ret, "Failed to register overflow handling.");
 

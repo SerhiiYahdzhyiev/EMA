@@ -6,7 +6,8 @@ int EMA_print_header(FILE* f)
 {
     int ret = fprintf(
         f,
-        "thread,region_idf,file,line,function,visits,device_name,energy,time\n"
+        "thread,region_idf,file,line,function,visits,"
+        "device_name,device_type,energy,time\n"
     );
     return ret >= 0 ? 0 : 1;
 }
@@ -17,7 +18,7 @@ int EMA_print_region(const Region* region, int thread_idx, FILE* f)
     {
         const Measurement *measurement = region->measurements.array + i;
         int ret = fprintf(
-            f, "%d,%s,%s,%d,%s,%llu,%s,%llu,%llu\n",
+            f, "%d,%s,%s,%d,%s,%llu,%s,%s,%llu,%llu\n",
             thread_idx,
             region->idf,
             region->file,
@@ -25,6 +26,7 @@ int EMA_print_region(const Region* region, int thread_idx, FILE* f)
             region->function,
             region->visits,
             measurement->device->name,
+            measurement->device->type,
             measurement->energy_result,
             measurement->time_result
         );

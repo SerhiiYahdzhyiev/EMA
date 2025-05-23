@@ -536,6 +536,7 @@ int rapl_plugin_finalize(Plugin* plugin)
     {
         EMA_finalize_overflow(&devices.array[i]);
         free((void*)devices.array[i].name);
+        free((void*)devices.array[i].type);
         free_rapl_device(devices.array[i].data);
     }
     free(devices.array);

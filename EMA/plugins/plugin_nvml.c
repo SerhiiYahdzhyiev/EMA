@@ -220,6 +220,7 @@ int nvml_plugin_finalize(Plugin* plugin)
     {
         EMA_finalize_overflow(&devices.array[i]);
         NvmlDeviceData* d_data = devices.array[i].data;
+        free((void*)devices.array[i].type);
         free(d_data->name);
         free(d_data);
     }

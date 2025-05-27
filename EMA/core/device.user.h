@@ -47,6 +47,6 @@ const char *EMA_device_get_name(const Device* device);
  *
  * @returns The type of the given device (e.g. cpu, gpu, fpga).
  */
-const char *EMA_device_get_type(const Device* device);
+const char *EMA_get_device_type(const Device* device);
 
 #endif

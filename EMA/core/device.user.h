@@ -47,6 +47,6 @@ const char *EMA_device_get_name(const Device* device);
  *
  * @returns The uid of the given device.
  */
-const char *EMA_device_get_uid(const Device* device);
+const char *EMA_get_device_uid(const Device* device);
 
 #endif

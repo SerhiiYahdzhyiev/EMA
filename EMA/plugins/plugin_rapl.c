@@ -456,6 +456,7 @@ int rapl_plugin_init(Plugin* plugin)
             device->data = rapl_sub_device;
             device->plugin = plugin;
             device->name = strdup(name);
+            device->type = strdup(DEVICE_TYPE);
             ret = EMA_init_overflow(device);
             ASSERT_MSG_OR_1(!ret, "Failed to register overflow handling.");
         }

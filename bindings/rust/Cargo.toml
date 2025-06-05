@@ -1,0 +1,3 @@
+[workspace]
+members = ["ema-sys", "EMA"]
+resolver = "3"

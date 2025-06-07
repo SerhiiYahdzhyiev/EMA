@@ -146,10 +146,16 @@ pub struct Region {
 }
 
 impl Region {
-    pub fn new(name: &str, filter: &Filter) -> Self {
+    pub fn new(
+        name: &str,
+        file: &str,
+        function: &str,
+        line: u32,
+        filter: &Filter
+    ) -> Self {
         let cname = CString::new(name).unwrap();
-        let file = CString::new(file!()).unwrap();
-        let func = CString::new("rust").unwrap();
+        let file = CString::new(file).unwrap();
+        let func = CString::new(function).unwrap();
 
         let mut region: *mut ema_sys::Region = ptr::null_mut();
         unsafe {
@@ -158,7 +164,7 @@ impl Region {
                 cname.as_ptr(),
                 filter.filter,
                 file.as_ptr(),
-                line!(),
+                line,
                 func.as_ptr(),
             );
         }

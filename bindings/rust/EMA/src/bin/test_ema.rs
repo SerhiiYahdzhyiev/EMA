@@ -18,7 +18,7 @@ fn main() {
 
     let filter = EMA::Filter::new("NVML");
 
-    let region = EMA::Region::new("region", &filter);
+    let region = EMA::Region::new("region", file!(), "main", 21, &filter);
     region.begin();
     std::thread::sleep(std::time::Duration::from_secs(5));
     region.end();

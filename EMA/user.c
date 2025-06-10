@@ -160,6 +160,7 @@ const char* EMA_get_device_name(const Device* device)
     return device->name;
 }
 
+
 /* Global interface. */
 PluginPtrArray EMA_get_plugins()
 {

@@ -318,7 +318,7 @@ int mqtt_plugin_finalize(Plugin* plugin)
         EMA_finalize_overflow(&devices.array[i]);
         MqttDeviceData* d_data = devices.array[i].data;
         free(d_data->name);
-        free(d_data->type);
+        free((void*)devices.array[i].type);
         free(d_data->topic);
         free(d_data);
     }

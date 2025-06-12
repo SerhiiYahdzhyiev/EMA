@@ -235,14 +235,14 @@ See LICENSE.md
 
 ## Funding
 
-The development of EMA is funded by the BMBF Germany in the context of the
+The development of EMA is funded by the BMFTR Germany in the context of the
 [NAAICE](https://gauss-allianz.de/en/project/title/NAAICE) project
 ([GreenHPC grant](https://gauss-allianz.de/en/project/call/Richtlinie%20zur%20F%C3%B6rderung%20von%20Verbundprojekten%20auf%20dem%20Gebiet%20des%20energieeffizienten%20High-%E2%80%8BPerformance%20Computings%20%28GreenHPC%29)).
 
 <div align=center>
   <img
-    src="./assets/img/BMBF-sponsored.jpg"
-    alt="Sponsored by the Federal Ministry of Education and Research"
+    src="./assets/img/BMFTR_en_DTP_CMYK_gef_durch.jpg"
+    alt="Sponsored by the Federal Ministry of Research, Technology and Space"
     width="300"
   />
 </div>

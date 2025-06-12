@@ -241,7 +241,7 @@ The development of EMA is funded by the BMFTR Germany in the context of the
 
 <div align=center>
   <img
-    src="./assets/img/BMFTR_en_DTP_CMYK_gef_durch.jpg"
+    src="./assets/img/BMFTR-sponsored.jpg"
     alt="Sponsored by the Federal Ministry of Research, Technology and Space"
     width="300"
   />

@@ -38,13 +38,6 @@ int main(int argc, char **argv)
     printf("Output:\n");
     EMA_print_all(stdout);
 
-    printf("Finalizing region...\n");
-    err = EMA_region_finalize(region);
-    if (err) {
-        printf("Failed to finalize region: %d\n", err);
-        return 1;
-    }
-
     printf("Finalizing EMA...\n");
     err = EMA_finalize();
     if (err) {

@@ -89,26 +89,7 @@ if( Mosquitto_FOUND )
 endif()
 
 # tests
-add_executable(
-    basic
-    tests/basic.c
-)
-target_include_directories(basic PRIVATE .)
-target_link_libraries(basic PRIVATE EMA)
-
-add_executable(
-    hl_region
-    tests/hl_region.c
-)
-target_include_directories(hl_region PRIVATE .)
-target_link_libraries(hl_region PRIVATE EMA)
-
-add_executable(
-    ll_region
-    tests/ll_region.c
-)
-target_include_directories(ll_region PRIVATE .)
-target_link_libraries(ll_region PRIVATE EMA)
+add_subdirectory(tests)
 
 # install
 # main public header

@@ -46,6 +46,7 @@ typedef struct
     unsigned idx;
     nvmlDevice_t nvml_device;
     char* name;
+    char* uid;
 } NvmlDeviceData;
 
 /* ****************************************************************************
@@ -90,11 +91,19 @@ NvmlDeviceData* init_nvml_device(unsigned idx)
     );
     d_data->name = device_name;
 
-    /* Add index to device name. TODO: Why?
-     * Add index for distinction between devices with same name. */
-    // int ret = asprintf(&d_data->name, "%s[%u]", d_data->name, idx);
-    // if( ret == -1 )
-    //     d_data->name = strdup("");
+    /* Set NVML device uuid */
+    char *device_uuid = malloc(NVML_DEVICE_UUID_BUFFER_SIZE * sizeof(char));
+    err = nvmlDeviceGetUUID(
+        d_data->nvml_device,
+        device_uuid,
+        NVML_DEVICE_UUID_BUFFER_SIZE
+    );
+    NVML_HANDLE_ERR_RET_NULL(
+        err,
+        "Failed to get UUID of device %u: %s\n",
+        idx, nvmlErrorString(err)
+    );
+    d_data->uid = device_uuid;
 
     /* Set NVML device index */
     d_data->idx = idx;
@@ -144,6 +153,7 @@ int nvml_plugin_init(Plugin* plugin)
 
         /* Keep default name on change. */
         devices.array[k].name = d_data->name;
+        devices.array[k].uid = d_data->uid;
 
         devices.array[k].type = strdup(DEVICE_TYPE);
 
@@ -222,6 +232,7 @@ int nvml_plugin_finalize(Plugin* plugin)
         NvmlDeviceData* d_data = devices.array[i].data;
         free((void*)devices.array[i].type);
         free(d_data->name);
+        free(d_data->uid);
         free(d_data);
     }
     free(p_data->devices.array);

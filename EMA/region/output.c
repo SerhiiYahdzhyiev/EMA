@@ -8,6 +8,8 @@ int EMA_print_header(FILE* f)
         f,
         "thread,region_idf,file,line,function,visits,"
         "device_name,device_type,energy,time\n"
+        "thread,region_idf,file,line,function,visits,device_name,"
+        "device_uid,energy,time\n"
     );
     return ret >= 0 ? 0 : 1;
 }
@@ -27,6 +29,7 @@ int EMA_print_region(const Region* region, int thread_idx, FILE* f)
             region->visits,
             measurement->device->name,
             measurement->device->type,
+            measurement->device->uid,
             measurement->energy_result,
             measurement->time_result
         );

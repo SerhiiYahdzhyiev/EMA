@@ -23,7 +23,7 @@ int main(int argc, char **argv)
 
     DevicePtrArray devices = EMA_get_devices();
     printf("Number of devices: %lu\n", devices.size);
-    for(size_t i = 0; i < devices.size; ++i)
+    for(size_t i = 0; i < devices.size; ++i) {
         printf("Device %lu: %s\n", i, EMA_get_device_name(devices.array[i]));
         printf("Device %lu: uid: %s\n", i, EMA_get_device_uid(devices.array[i]));
     }

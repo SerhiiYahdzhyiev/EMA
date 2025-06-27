@@ -41,13 +41,6 @@ typedef struct
 const char *EMA_device_get_name(const Device* device);
 
 /**
- * This function reads the type of a given device.
- *
- * @param device: `Device` from which the type is to be read.
- *
- * @returns The type of the given device (e.g. cpu, gpu, fpga).
- */
-const char *EMA_get_device_type(const Device* device);
  * This function reads the unique identifier of a given device.
  *
  * @param device: `Device` from which the uid is to be read.
@@ -55,5 +48,14 @@ const char *EMA_get_device_type(const Device* device);
  * @returns The uid of the given device.
  */
 const char *EMA_get_device_uid(const Device* device);
+
+/**
+ * This function reads the type of a given device.
+ *
+ * @param device: `Device` from which the type is to be read.
+ *
+ * @returns The type of the given device (e.g. cpu, gpu, fpga).
+ */
+const char *EMA_get_device_type(const Device* device);
 
 #endif

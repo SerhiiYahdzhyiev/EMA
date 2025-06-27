@@ -39,8 +39,13 @@ int main(int argc, char **argv)
     printf("Output: \n");
     EMA_print_all(stdout);
 
-    printf("Finalize\n");
-    EMA_finalize();
+    printf("Finalizing EMA...\n");
+    err = EMA_finalize();
+    if (err)
+    {
+        printf("Failed to finalize EMA: %d\n", err);
+        return 1;
+    }
 
     return 0;
 }

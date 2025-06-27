@@ -89,12 +89,7 @@ if( Mosquitto_FOUND )
 endif()
 
 # tests
-add_executable(
-    basic
-    tests/basic.c
-)
-target_include_directories(basic PRIVATE .)
-target_link_libraries(basic PRIVATE EMA)
+add_subdirectory(tests)
 
 # install
 # main public header

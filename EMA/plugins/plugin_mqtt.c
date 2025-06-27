@@ -33,6 +33,9 @@
 #define MQTT_HANDLE_ERR_RET_NULL(err, format, ...) \
     _MQTT_HANDLE_ERR(err, NULL, format, ##__VA_ARGS__)
 
+/* TODO: Make this part of registration message, instead of hard-coding. */
+#define DEVICE_TYPE "misc"
+
 /* ****************************************************************************
 **** Typedefs
 **************************************************************************** */
@@ -262,6 +265,8 @@ int mqtt_plugin_init(Plugin* plugin)
 
         /* Set device array. */
         devices.array[i].name = d_data->name;
+        /* TODO: Derive the type from d_data as well. */
+        devices.array[i].type = strdup(DEVICE_TYPE);
         devices.array[i].name = d_data->uid;
         devices.array[i].data = d_data;
         devices.array[i].plugin = plugin;
@@ -316,6 +321,7 @@ int mqtt_plugin_finalize(Plugin* plugin)
         EMA_finalize_overflow(&devices.array[i]);
         MqttDeviceData* d_data = devices.array[i].data;
         free(d_data->name);
+        free((void*)devices.array[i].type);
         free(d_data->uid);
         free(d_data->topic);
         free(d_data);

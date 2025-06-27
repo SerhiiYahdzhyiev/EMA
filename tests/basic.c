@@ -26,6 +26,7 @@ int main(int argc, char **argv)
     for(size_t i = 0; i < devices.size; ++i) {
         printf("Device %lu: %s\n", i, EMA_get_device_name(devices.array[i]));
         printf("Device %lu: uid: %s\n", i, EMA_get_device_uid(devices.array[i]));
+        printf("Device %lu: type: %s\n", i, EMA_get_device_type(devices.array[i]));
     }
 
     /* Filter. */

@@ -9,3 +9,8 @@ const char *EMA_get_device_uid(const Device* device)
 {
     return device->uid;
 }
+
+const char *EMA_get_device_type(const Device* device)
+{
+    return device->type;
+}

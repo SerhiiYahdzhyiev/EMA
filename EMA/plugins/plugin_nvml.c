@@ -31,6 +31,8 @@
 #define NVML_HANDLE_ERR_RET_1(err, format, ...) \
     _NVML_HANDLE_ERR(err, 1, format, ##__VA_ARGS__)
 
+#define DEVICE_TYPE "gpu"
+
 /* ****************************************************************************
 **** Typedefs
 **************************************************************************** */
@@ -153,6 +155,8 @@ int nvml_plugin_init(Plugin* plugin)
         devices.array[k].name = d_data->name;
         devices.array[k].uid = d_data->uid;
 
+        devices.array[k].type = strdup(DEVICE_TYPE);
+
         /* Init overflow handling. */
         int ret = EMA_init_overflow(&devices.array[k]);
         NVML_HANDLE_ERR_RET_1(ret, "Failed to register overflow handling.");
@@ -226,6 +230,7 @@ int nvml_plugin_finalize(Plugin* plugin)
     {
         EMA_finalize_overflow(&devices.array[i]);
         NvmlDeviceData* d_data = devices.array[i].data;
+        free((void*)devices.array[i].type);
         free(d_data->name);
         free(d_data->uid);
         free(d_data);

@@ -30,6 +30,8 @@
 #define RAPL_HANDLE_ERR(ret, msg, ...) \
     _RAPL_HANDLE_ERR(ret, msg,  ##__VA_ARGS__)
 
+#define DEVICE_TYPE "cpu"
+
 /* ****************************************************************************
 **** Typedefs
 **************************************************************************** */
@@ -423,6 +425,7 @@ int rapl_plugin_init(Plugin* plugin)
         device->data = rapl_device;
         device->plugin = plugin;
         device->name = strdup(name);
+        device->type = strdup(DEVICE_TYPE);
         device->uid = strdup(uid);
         ret = EMA_init_overflow(device);
         ASSERT_MSG_OR_1(!ret, "Failed to register overflow handling.");
@@ -461,6 +464,7 @@ int rapl_plugin_init(Plugin* plugin)
             device->data = rapl_sub_device;
             device->plugin = plugin;
             device->name = strdup(name);
+            device->type = strdup(DEVICE_TYPE);
             device->uid = strdup(suid);
             ret = EMA_init_overflow(device);
             ASSERT_MSG_OR_1(!ret, "Failed to register overflow handling.");
@@ -542,6 +546,7 @@ int rapl_plugin_finalize(Plugin* plugin)
     {
         EMA_finalize_overflow(&devices.array[i]);
         free((void*)devices.array[i].name);
+        free((void*)devices.array[i].type);
         free((void*)devices.array[i].uid);
         free_rapl_device(devices.array[i].data);
     }

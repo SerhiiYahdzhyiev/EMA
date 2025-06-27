@@ -34,13 +34,14 @@ int main(int argc, char **argv)
     /* Lower-level API. */
     printf("Region 1\n");
     static thread_local Region *region = NULL;
-    EMA_region_define(&region, "r1", filter, "", 0, "");
+    EMA_region_create_and_init(&region, "r1", filter, "", 0, "");
 
     EMA_region_begin(region);
 
     sleep(2);
 
     EMA_region_end(region);
+    EMA_region_finalize(region);
 
     /* Higher-level API. */
     printf("Region 2\n");

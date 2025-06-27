@@ -1,45 +1,112 @@
-# **EMA - Energy Measurement for Applications**
+# EMA - Energy Measurement for Applications
 
-# What is EMA?
+The EMA framework is a tool for measuring energy consumption of applications.
+It allows the integration of various energy measurement devices with the
+built-in plugin system. It also allows users to define measurement regions
+directly in the source code.
 
-The EMA framework is a tool for profiling the energy consumption of
-self-defined code regions of HPC applications. It allows the integration of
-various energy measurement devices with the built-in plugin system.
+The development was started under [GreenHPC](https://greenhpc.eu)
+initiative.
 
-# Quickstart
+## Table of Contents
+
+1. [Overview](#overview)
+2. [Installation](#installation)
+3. [Usage](#usage)
+4. [License](#license)
+5. [Funding](#funding)
+
+## Overview
+
+EMA is designed to provide user-friendly API's for measuring the energy
+consumption and/or individual energy values in arbitrary applications. It
+provides sets of predefined *High Level* macros and more *Low Level* functions
+allowing users to do following actions:
+
+   - define measurement regions in the source code of users applications
+   - filter measured devices
+   - filter plugins
+   - control the outputs of measurements
+   - get individual energy and/or time values in arbitrary locations of
+     applications source code
+
+*You will find more details in [Usage](#usage) section.*
+
+### Plugins
+
+EMA `Plugins` encapsulate realization details of energy measurements. They have
+a well-defined interface which is the part of EMA's core. EMA's flexibility is
+based on `Plugins` as well: users can write their own plugins to add support
+for new hardware devices or extend/fix/modify measurements realization for
+existing ones.
+
+Current version comes with the following pre-developed plugins:
+
+   - [RAPL](https://www.intel.de/content/dam/www/public/us/en/documents/manuals/64-ia-32-architectures-software-developer-vol-3b-part-2-manual.pdf)
+     plugin (CPUs)
+   - [NVML](https://developer.nvidia.com/management-library-nvml) plugin
+     (Nvidia GPUs)
+   - [MQTT](https://mqtt.org) plugin (Custom hardware setups
+     over network)
 
 ## Installation
 
-**Build from tarball**
-```
-tar -xf <filename>.tar.gz
-mkdir <filename>/build
-cd <filename>/build
-cmake .. \
-  -DCMAKE_BUILD_TYPE=Release \
-  -DCMAKE_INSTALL_PREFIX=<install_dir>
-make install
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:<install_dir>/lib
-```
+### Base Prerequisites
 
-**Build from git checkout**
-```
-git clone <URL>
-mkdir <filename>/build
-cd <filename>/build
-cmake .. \
-  -DCMAKE_BUILD_TYPE=Release \
-  -DCMAKE_INSTALL_PREFIX=<install_dir>
-make install
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:<install_dir>/lib
-```
+   - [CMake](https://cmake.org)
 
-## Accessing RAPL values
+### General Steps
 
-After every system start, the system administrator need to set read permissions
-for users/groups to access the following files:
-  - /sys/class/powercap/intel-rapl:<socket>/energy_uj
-  - /sys/class/powercap/intel-rapl:<socket>:<rapl_device>/energy_uj
+1. [Clone the repository](https://git-scm.com/docs/git-clone) and navigate to its root directory.
+
+2. Create `build` directory and navigate to it:
+
+   ```bash
+   mkdir build && cd build
+   ```
+
+3. Configure and generate build files.
+
+   There are plenty of ways how you can do this, if you're not familiar with
+   [CMake](https://cmake.org) check out related sections of the [official documentation](https://cmake.org/documentation/).
+
+4. Build EMA:
+
+   ```bash
+   make
+   ```
+
+   *NOTE: This command will also build test executables from `tests` directory.*
+
+5. Install:
+
+   ```bash
+   make install
+   ```
+
+6. Update `LD_LIBRARY_PATH`:
+
+   ```bash
+   export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:<EMA_install_dir>/lib
+   ```
+
+### Documentation
+
+This project uses [Sphinx](https://www.sphinx-doc.org/en/master/) for building
+documentation.
+
+#### Prerequisites
+
+- [Python 3](https://python.org)
+- [Clang](https://clang.llvm.org/)
+- [Sphinx](https://www.sphinx-doc.org/en/master/)
+- [Sphinx C Autodoc](https://sphinx-c-autodoc.readthedocs.io/en/latest/)
+
+#### Steps
+
+1. Create Python environment, install and set up all dependencies.
+2. Navigate to the `docs` directory.
+3. Build desired type of documentation with `make`.
 
 ## Usage
 
@@ -152,13 +219,30 @@ measurement results per region and device.
 | energy | Measured energy consumption in uJ (micro joules). |
 | time | Measured duration in us (micro seconds). |
 
-# License
+### Troubleshooting
+
+#### Accessing RAPL values
+
+After every system start, the system administrator need to set read permissions
+for users/groups to access the following files:
+  - /sys/class/powercap/intel-rapl:<socket>/energy_uj
+  - /sys/class/powercap/intel-rapl:<socket>:<rapl_device>/energy_uj
+
+## License
 
 This project is licensed under the terms of the BSD-3 license.
 See LICENSE.md
 
-# Authors/Contact
-| name | email |
-| ---- | ----- |
-| Johannes Spazier | spazier@perfacct.eu |
-| Danny Puhan | puhan@perfacct.eu |
+## Funding
+
+The development of EMA is funded by the BMFTR Germany in the context of the
+[NAAICE](https://gauss-allianz.de/en/project/title/NAAICE) project
+([GreenHPC grant](https://gauss-allianz.de/en/project/call/Richtlinie%20zur%20F%C3%B6rderung%20von%20Verbundprojekten%20auf%20dem%20Gebiet%20des%20energieeffizienten%20High-%E2%80%8BPerformance%20Computings%20%28GreenHPC%29)).
+
+<div align=center>
+  <img
+    src="./assets/img/BMFTR-sponsored.jpg"
+    alt="Sponsored by the Federal Ministry of Research, Technology and Space"
+    width="300"
+  />
+</div>

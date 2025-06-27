@@ -64,6 +64,7 @@ typedef struct
 typedef struct
 {
     char* name;
+    char* uid;
     char* topic;
     uint8_t type;
     MqttPluginConfig* config;
@@ -113,6 +114,7 @@ uint16_t bytes_to_mqtt_device_data(uint8_t* buf, MqttDeviceData* d_data)
     offset += sizeof(uint64_t);
 
     d_data->name = byte_to_char_ptr(&buf[offset], len);
+    d_data->uid = byte_to_char_ptr(&buf[offset], len);
     offset += len;
 
     len = byte_to_uint64(&buf[offset]);
@@ -260,6 +262,7 @@ int mqtt_plugin_init(Plugin* plugin)
 
         /* Set device array. */
         devices.array[i].name = d_data->name;
+        devices.array[i].name = d_data->uid;
         devices.array[i].data = d_data;
         devices.array[i].plugin = plugin;
 
@@ -313,6 +316,7 @@ int mqtt_plugin_finalize(Plugin* plugin)
         EMA_finalize_overflow(&devices.array[i]);
         MqttDeviceData* d_data = devices.array[i].data;
         free(d_data->name);
+        free(d_data->uid);
         free(d_data->topic);
         free(d_data);
     }

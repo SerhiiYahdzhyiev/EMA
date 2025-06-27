@@ -16,6 +16,7 @@
 #include <EMA/utils/error.h>
 
 #define RAPL_MAX 128
+#define RAPL_UID_MAX 15
 #define MAX_POWER_CONSTRAINTS 3
 
 #define CONCAT(var, format, ...) \
@@ -415,10 +416,14 @@ int rapl_plugin_init(Plugin* plugin)
             continue;
         }
 
+        char uid[RAPL_UID_MAX];
+        snprintf(uid, RAPL_UID_MAX, "%d", rapl_device->package);
+
         Device *device = devices.array + count_devices++;
         device->data = rapl_device;
         device->plugin = plugin;
         device->name = strdup(name);
+        device->uid = strdup(uid);
         ret = EMA_init_overflow(device);
         ASSERT_MSG_OR_1(!ret, "Failed to register overflow handling.");
 
@@ -449,10 +454,14 @@ int rapl_plugin_init(Plugin* plugin)
                 continue;
             }
 
+            char suid[RAPL_UID_MAX];
+            snprintf(suid, RAPL_UID_MAX, "%d", rapl_sub_device->package);
+
             Device *device = devices.array + count_devices++;
             device->data = rapl_sub_device;
             device->plugin = plugin;
             device->name = strdup(name);
+            device->uid = strdup(suid);
             ret = EMA_init_overflow(device);
             ASSERT_MSG_OR_1(!ret, "Failed to register overflow handling.");
         }
@@ -533,6 +542,7 @@ int rapl_plugin_finalize(Plugin* plugin)
     {
         EMA_finalize_overflow(&devices.array[i]);
         free((void*)devices.array[i].name);
+        free((void*)devices.array[i].uid);
         free_rapl_device(devices.array[i].data);
     }
     free(devices.array);

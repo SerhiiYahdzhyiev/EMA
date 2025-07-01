@@ -95,7 +95,7 @@ int EMA_finalize()
     if( ret != 0 )
         return ret;
 
-    stop_overflow_tracking(&registry.devices);
+    stop_overflow_tracking();
 
     for(int i = 0; i < registry.plugins.size; ++i)
     {

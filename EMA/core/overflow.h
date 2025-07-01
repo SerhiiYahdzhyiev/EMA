@@ -16,7 +16,7 @@ typedef struct OverflowData
 } OverflowData;
 
 int start_overflow_tracking(DevicePtrArray* dev_ptrs);
-int stop_overflow_tracking();
+int stop_overflow_tracking(void);
 unsigned long long EMA_get_handled_energy_uj(const Device* device);
 int EMA_init_overflow(Device* device);
 int EMA_finalize_overflow(Device* device);

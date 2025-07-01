@@ -84,7 +84,7 @@ int start_overflow_tracking(DevicePtrArray* dev_ptrs)
     ASSERT_1(!ret, "Failed to start overflow_tracking.");
 }
 
-int stop_overflow_tracking()
+int stop_overflow_tracking(void)
 {
     int ret = pthread_cancel(overflow_handler);
     ASSERT_1(!ret, "Failed to cancel overflow thread.");

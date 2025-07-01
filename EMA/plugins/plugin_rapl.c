@@ -18,6 +18,8 @@
 #define RAPL_MAX 128
 #define MAX_POWER_CONSTRAINTS 3
 
+#define MAX_POWER_CONSTRAINT_DEFAULT_UW 1000000000 // 1000 W
+
 #define CONCAT(var, format, ...) \
     snprintf(var, PATH_MAX, format, ##__VA_ARGS__)
 
@@ -339,6 +341,12 @@ RaplDeviceData *create_rapl_device(const char* zone, const char* sub_zone)
         return NULL;
 
     constraint_max_power = _read_rapl_constraint_max_power_uw(zone);
+
+    if (constraint_max_power == 0) {
+        /* If no constraints are available, use default value. */
+        constraint_max_power = MAX_POWER_CONSTRAINT_DEFAULT_UW;
+    }
+
     energy_update_interval_ms = 1000 * max_range / constraint_max_power;
 
     /* Setup rapl device. */

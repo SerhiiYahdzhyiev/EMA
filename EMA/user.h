@@ -31,7 +31,7 @@ int EMA_init(EMA_init_cb);
 /**
  * This function finalizes the EMA framework.
  */
-int EMA_finalize();
+int EMA_finalize(void);
 
 /* Plugin interface. */
 
@@ -109,13 +109,13 @@ const char* EMA_get_device_name(const Device* device);
  *
  * @returns The registered `Plugins`.
  */
-PluginPtrArray EMA_get_plugins();
+PluginPtrArray EMA_get_plugins(void);
 
 /**
  * This function collects the registered `Devices`.
  *
  * @returns The registered `Devices`.
  */
-DevicePtrArray EMA_get_devices();
+DevicePtrArray EMA_get_devices(void);
 
 #endif

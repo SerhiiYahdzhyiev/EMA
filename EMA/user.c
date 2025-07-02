@@ -15,7 +15,7 @@
 extern PluginRegistry registry;
 
 /* Output. */
-int EMA_print_results()
+int EMA_print_results(void)
 {
     int ret;
     char* filename;
@@ -89,7 +89,7 @@ int EMA_init(EMA_init_cb callback)
     return 0;
 }
 
-int EMA_finalize()
+int EMA_finalize(void)
 {
     int ret = EMA_print_results();
     if( ret != 0 )
@@ -162,12 +162,12 @@ const char* EMA_get_device_name(const Device* device)
 
 
 /* Global interface. */
-PluginPtrArray EMA_get_plugins()
+PluginPtrArray EMA_get_plugins(void)
 {
     return registry.plugins;
 }
 
-DevicePtrArray EMA_get_devices()
+DevicePtrArray EMA_get_devices(void)
 {
     return registry.devices;
 }

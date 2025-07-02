@@ -6,7 +6,7 @@
 
 typedef struct RegionStore RegionStore;
 
-RegionStore* EMA_region_store_init();
+RegionStore* EMA_region_store_init(void);
 int EMA_region_store_set(RegionStore* store, Region* region);
 size_t EMA_region_store_size(RegionStore* store);
 int EMA_region_store_finalize(RegionStore* store);
@@ -16,10 +16,10 @@ int EMA_region_store_iterate(
     const RegionStore* store, EMA_region_iterator_cb cb, void *usr);
 
 /* Thread-level interface. */
-int EMA_thread_init();
-RegionStore* EMA_thread_get_region_store();
-size_t EMA_thread_get_count();
+int EMA_thread_init(void);
+RegionStore* EMA_thread_get_region_store(void);
+size_t EMA_thread_get_count(void);
 RegionStore* EMA_get_region_store(int thread_idx);
-int EMA_region_stores_finalize();
+int EMA_region_stores_finalize(void);
 
 #endif

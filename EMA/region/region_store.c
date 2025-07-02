@@ -23,7 +23,7 @@ char* EMA_get_region_key(Region* region)
     return key;
 }
 
-RegionStore* EMA_region_store_init()
+RegionStore* EMA_region_store_init(void)
 {
     RegionStore *store = malloc(sizeof(RegionStore));
     if( !store )
@@ -101,7 +101,7 @@ static atomic_int EMA_thread_count = 0;
 static thread_local int EMA_local_thread_idx = -1;
 static RegionStore* EMA_region_store[THREAD_LIMIT];
 
-int EMA_thread_init()
+int EMA_thread_init(void)
 {
     if( EMA_local_thread_idx >= 0 )
         return 0;
@@ -115,14 +115,14 @@ int EMA_thread_init()
     return 0;
 }
 
-RegionStore* EMA_thread_get_region_store()
+RegionStore* EMA_thread_get_region_store(void)
 {
     if( EMA_local_thread_idx >= 0 )
         return EMA_region_store[EMA_local_thread_idx];
     return NULL;
 }
 
-size_t EMA_thread_get_count()
+size_t EMA_thread_get_count(void)
 {
     return EMA_thread_count;
 }
@@ -132,7 +132,7 @@ RegionStore* EMA_get_region_store(int thread_idx)
     return EMA_region_store[thread_idx];
 }
 
-int EMA_region_stores_finalize()
+int EMA_region_stores_finalize(void)
 {
     for(size_t i = 0; i < EMA_thread_count; ++i) {
         EMA_region_store_finalize(EMA_region_store[i]);

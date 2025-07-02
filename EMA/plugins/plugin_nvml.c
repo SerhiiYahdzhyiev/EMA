@@ -54,7 +54,7 @@ typedef struct
 **************************************************************************** */
 
 static
-void nvml_shutdown()
+void nvml_shutdown(void)
 {
     nvmlReturn_t err = nvmlShutdown();
     if(err)
@@ -263,7 +263,7 @@ Plugin* create_nvml_plugin(const char* name)
     return plugin;
 }
 
-int register_nvml_plugin()
+int register_nvml_plugin(void)
 {
     Plugin *plugin = create_nvml_plugin("NVML");
     ASSERT_OR_1(plugin);

@@ -126,7 +126,7 @@ int get_num_rapl_zones(void)
 }
 
 static
-int count_all_rapl_zones()
+int count_all_rapl_zones(void)
 {
     int rapl_count = 0;
     for(int i = 0; i < get_num_rapl_zones(); i++)
@@ -585,7 +585,7 @@ Plugin* create_rapl_plugin(const char* name)
     return plugin;
 }
 
-int register_rapl_plugin()
+int register_rapl_plugin(void)
 {
     Plugin *plugin = create_rapl_plugin("RAPL");
     ASSERT_OR_1(plugin);

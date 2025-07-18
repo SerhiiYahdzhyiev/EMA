@@ -229,7 +229,8 @@ static
 int mqtt_plugin_init(Plugin* plugin)
 {
     DeviceArray devices;
-    MqttPluginConfig *config = plugin->data;
+    MqttPluginData* p_data = plugin->data;
+    MqttPluginConfig* config = p_data->config;
 
     /* Initialize mosquitto. */
     mosquitto_lib_init();
@@ -277,12 +278,9 @@ int mqtt_plugin_init(Plugin* plugin)
     }
     free(bytes);
 
-    /* Set plugin data. */
-    MqttPluginData* p_data = malloc(sizeof(MqttPluginData));
+    /* Set plugin data devices. */
     p_data->devices = devices;
-    p_data->config = config;
 
-    plugin->data = p_data;
     return 0;
 }
 
@@ -342,10 +340,13 @@ int mqtt_plugin_finalize(Plugin* plugin)
 Plugin* create_mqtt_plugin(
     const char* name, const char* host, uint16_t port, const char* topic)
 {
+    MqttPluginData* p_data = malloc(sizeof(MqttPluginData));
     MqttPluginConfig* config = malloc(sizeof(MqttPluginConfig));
     config->host = host;
     config->port = port;
     config->topic = topic;
+
+    p_data->config = config;
 
     Plugin* plugin = malloc(sizeof(Plugin));
     ASSERT_OR_NULL(plugin);
@@ -357,7 +358,7 @@ Plugin* create_mqtt_plugin(
     plugin->cbs.get_energy_max = mqtt_plugin_get_energy_max;
     plugin->cbs.get_energy_uj = mqtt_plugin_get_energy_uj;
     plugin->cbs.finalize = mqtt_plugin_finalize;
-    plugin->data = config;
+    plugin->data = p_data;
     plugin->name = name;
 
     return plugin;

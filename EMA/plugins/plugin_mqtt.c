@@ -187,6 +187,7 @@ uint8_t* read_devices(MqttPluginConfig* config)
 
     int err = read_byte_message(
         mqtt, config->host, config->port, config->topic);
+    if (err) mosquitto_destroy(mqtt);
     MQTT_HANDLE_ERR_RET_NULL(err, "Failed to read byte message.\n");
 
     mosquitto_destroy(mqtt);
@@ -210,6 +211,7 @@ uint64_t read_energy(MqttDeviceData* device)
         device->config->port,
         device->topic
     );
+    if (err) mosquitto_destroy(mqtt);
     MQTT_HANDLE_ERR_RET_1(err, "Failed to read byte message.\n");
 
     mosquitto_destroy(mqtt);
@@ -346,6 +348,8 @@ Plugin* create_mqtt_plugin(
     config->port = port;
     config->topic = topic;
 
+    p_data->devices.array = NULL;
+    p_data->devices.size = 0;
     p_data->config = config;
 
     Plugin* plugin = malloc(sizeof(Plugin));

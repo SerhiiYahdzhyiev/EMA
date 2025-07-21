@@ -161,7 +161,6 @@ int read_byte_message(
     const char* topic = config->topic;
     int port = config->port;
 
-    printf("[read_byte_message]: Connecting mosquitto...\n");
     int ret = mosquitto_connect(mqtt, host, port, 5);
     MQTT_HANDLE_ERR_RET_1(
         ret, "Failed to connect to mosquitto: mosquitto_connect(): %d.\n", ret);
@@ -169,8 +168,6 @@ int read_byte_message(
     ret = mosquitto_subscribe(mqtt, NULL, topic, 0);
     MQTT_HANDLE_ERR_RET_1(
         ret, "Failed to connect to mosquitto: mosquitto_subscribe().\n");
-
-    printf("[read_byte_message]: Starting mosquitto loop...\n");
 
     time_t start = time(NULL);
     ByteArray* bytes = (ByteArray*)mosquitto_userdata(mqtt);
@@ -204,7 +201,6 @@ uint8_t* read_devices(MqttPluginConfig* config)
     mosquitto_message_callback_set(mqtt, on_message_read_bytes);
 
     const int timeout_sec = config->read_devices_timeout_sec;
-    printf("[read_devices]: Reading byte message...\n");
     int err = read_byte_message(mqtt, config, timeout_sec);
     if (err) mosquitto_destroy(mqtt);
     MQTT_HANDLE_ERR_RET_NULL(err, "Failed to read byte message.\n");
@@ -232,7 +228,6 @@ uint64_t read_energy(MqttDeviceData* device)
         .topic = device->topic
     };
 
-    printf("[read_energy]: Reading byte message...\n");
     int err = read_byte_message(mqtt, &device_config, timeout_sec);
     if (err) mosquitto_destroy(mqtt);
     MQTT_HANDLE_ERR_RET_1(err, "Failed to read byte message.\n");
@@ -253,7 +248,6 @@ uint64_t read_energy(MqttDeviceData* device)
 static
 int mqtt_plugin_init(Plugin* plugin)
 {
-    printf("Initializing MQTT plugin...\n"); 
     DeviceArray devices = {
         .size = 0,
         .array = NULL
@@ -308,11 +302,8 @@ int mqtt_plugin_init(Plugin* plugin)
     free(bytes);
 
     /* Set plugin data. */
-    MqttPluginData* p_data = malloc(sizeof(MqttPluginData));
     p_data->devices = devices;
-    p_data->config = config;
 
-    plugin->data = p_data;
     return 0;
 }
 
@@ -399,7 +390,7 @@ Plugin* create_mqtt_plugin(
     plugin->cbs.get_energy_max = mqtt_plugin_get_energy_max;
     plugin->cbs.get_energy_uj = mqtt_plugin_get_energy_uj;
     plugin->cbs.finalize = mqtt_plugin_finalize;
-    plugin->data = config;
+    plugin->data = p_data;
     plugin->name = name;
 
     return plugin;

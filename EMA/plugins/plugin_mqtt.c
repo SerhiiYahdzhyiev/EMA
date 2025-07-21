@@ -1,8 +1,9 @@
-#include <errno.h>
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
+#include <unistd.h>
 
 #include <mosquitto.h>
 
@@ -11,6 +12,8 @@
 #include <EMA/core/plugin.h>
 #include <EMA/core/registry.h>
 #include <EMA/utils/error.h>
+
+#include "plugin_mqtt.h"
 
 #define VERSION 0x1
 
@@ -43,6 +46,7 @@ typedef struct
 {
     uint16_t size;
     uint8_t* bytes;
+    uint8_t message_received;
 } ByteArray;
 
 typedef struct
@@ -50,13 +54,6 @@ typedef struct
     uint64_t value;
     uint64_t time;
 } MsrValues;
-
-typedef struct
-{
-    const char* host;
-    uint16_t port;
-    const char* topic;
-} MqttPluginConfig;
 
 typedef struct
 {
@@ -142,6 +139,8 @@ void on_message_read_bytes(
 
     bytes->size = msg->payloadlen;
     bytes->bytes = malloc(bytes->size);
+    bytes->message_received = 1;
+
     memcpy(bytes->bytes, msg->payload, bytes->size);
 
     mosquitto_unsubscribe(mqtt, NULL, msg->topic);
@@ -150,11 +149,19 @@ void on_message_read_bytes(
 
 static
 int read_byte_message(
-    struct mosquitto *mqtt, const char* host, uint16_t port, const char* topic)
+    struct mosquitto *mqtt,
+    MqttPluginConfig* config,
+    int timeout
+)
 {
     if( !mqtt )
         return 0;
 
+    const char* host = config->host;
+    const char* topic = config->topic;
+    int port = config->port;
+
+    printf("[read_byte_message]: Connecting mosquitto...\n");
     int ret = mosquitto_connect(mqtt, host, port, 5);
     MQTT_HANDLE_ERR_RET_1(
         ret, "Failed to connect to mosquitto: mosquitto_connect(): %d.\n", ret);
@@ -163,13 +170,23 @@ int read_byte_message(
     MQTT_HANDLE_ERR_RET_1(
         ret, "Failed to connect to mosquitto: mosquitto_subscribe().\n");
 
-    ret = mosquitto_loop_start(mqtt);
-    MQTT_HANDLE_ERR_RET_1(
-        ret, "Failed to connect to mosquitto: mosquitto_loop_start().\n");
+    printf("[read_byte_message]: Starting mosquitto loop...\n");
 
-    ret = mosquitto_loop_stop(mqtt, false);
-    MQTT_HANDLE_ERR_RET_1(
-        ret, "Failed to connect to mosquitto: mosquitto_loop_stop().\n");
+    time_t start = time(NULL);
+    ByteArray* bytes = (ByteArray*)mosquitto_userdata(mqtt);
+
+    while (!bytes->message_received) {
+        ret = mosquitto_loop(mqtt, 100, 1);
+        if (ret != MOSQ_ERR_SUCCESS) {
+            fprintf(stderr, "mosquitto_loop: %s\n", mosquitto_strerror(ret));
+            return 1;
+        }
+        if (difftime(time(NULL), start) >= timeout) {
+            fprintf(stderr, "mosquitto_loop: timed out (%d sec)\n", timeout);
+            return 1;
+        }
+        usleep(100*1000); // 100ms
+    }
 
     return 0;
 }
@@ -180,13 +197,16 @@ uint8_t* read_devices(MqttPluginConfig* config)
     ByteArray bytes;
     bytes.size = 0;
     bytes.bytes = NULL;
+    bytes.message_received = 0;
 
     struct mosquitto *mqtt = mosquitto_new(NULL, 1, &bytes);
 
     mosquitto_message_callback_set(mqtt, on_message_read_bytes);
 
-    int err = read_byte_message(
-        mqtt, config->host, config->port, config->topic);
+    const int timeout_sec = config->read_devices_timeout_sec;
+    printf("[read_devices]: Reading byte message...\n");
+    int err = read_byte_message(mqtt, config, timeout_sec);
+    if (err) mosquitto_destroy(mqtt);
     MQTT_HANDLE_ERR_RET_NULL(err, "Failed to read byte message.\n");
 
     mosquitto_destroy(mqtt);
@@ -200,16 +220,21 @@ uint64_t read_energy(MqttDeviceData* device)
     ByteArray bytes;
     bytes.size = 0;
     bytes.bytes = NULL;
+    bytes.message_received = 0;
 
     struct mosquitto *mqtt = mosquitto_new(NULL, 1, &bytes);
     mosquitto_message_callback_set(mqtt, on_message_read_bytes);
 
-    int err = read_byte_message(
-        mqtt,
-        device->config->host,
-        device->config->port,
-        device->topic
-    );
+    const int timeout_sec = device->config->read_energy_timeout_sec;
+    MqttPluginConfig device_config = {
+        .host = device->config->host,
+        .port = device->config->port,
+        .topic = device->topic
+    };
+
+    printf("[read_energy]: Reading byte message...\n");
+    int err = read_byte_message(mqtt, &device_config, timeout_sec);
+    if (err) mosquitto_destroy(mqtt);
     MQTT_HANDLE_ERR_RET_1(err, "Failed to read byte message.\n");
 
     mosquitto_destroy(mqtt);
@@ -228,8 +253,13 @@ uint64_t read_energy(MqttDeviceData* device)
 static
 int mqtt_plugin_init(Plugin* plugin)
 {
-    DeviceArray devices;
-    MqttPluginConfig *config = plugin->data;
+    printf("Initializing MQTT plugin...\n"); 
+    DeviceArray devices = {
+        .size = 0,
+        .array = NULL
+    };
+    MqttPluginData* p_data = plugin->data;
+    MqttPluginConfig* config = p_data->config;
 
     /* Initialize mosquitto. */
     mosquitto_lib_init();
@@ -328,6 +358,8 @@ int mqtt_plugin_finalize(Plugin* plugin)
     }
 
     free(p_data->devices.array);
+    free(p_data->config->host);
+    free(p_data->config->topic);
     free(p_data->config);
     free(p_data);
 
@@ -340,12 +372,22 @@ int mqtt_plugin_finalize(Plugin* plugin)
 **************************************************************************** */
 
 Plugin* create_mqtt_plugin(
-    const char* name, const char* host, uint16_t port, const char* topic)
+    const char* name,
+    MqttPluginConfig* config
+)
 {
-    MqttPluginConfig* config = malloc(sizeof(MqttPluginConfig));
-    config->host = host;
-    config->port = port;
-    config->topic = topic;
+    MqttPluginData* p_data = malloc(sizeof(MqttPluginData));
+    MqttPluginConfig* _config = malloc(sizeof(MqttPluginConfig));
+
+    _config->host = strdup(config->host);
+    _config->port = config->port;
+    _config->topic = strdup(config->topic);
+    _config->read_devices_timeout_sec = config->read_devices_timeout_sec;
+    _config->read_energy_timeout_sec = config->read_energy_timeout_sec;
+
+    p_data->devices.array = NULL;
+    p_data->devices.size = 0;
+    p_data->config = _config;
 
     Plugin* plugin = malloc(sizeof(Plugin));
     ASSERT_OR_NULL(plugin);
@@ -363,10 +405,9 @@ Plugin* create_mqtt_plugin(
     return plugin;
 }
 
-int register_mqtt_plugin(
-    const char* name, const char* host, uint16_t port, const char* topic)
+int register_mqtt_plugin(const char* name, MqttPluginConfig* config)
 {
-    Plugin *plugin = create_mqtt_plugin(name, host, port, topic);
+    Plugin *plugin = create_mqtt_plugin(name, config);
     ASSERT_OR_1(plugin);
     return EMA_register_plugin(plugin);
 }

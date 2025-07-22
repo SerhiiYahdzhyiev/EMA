@@ -285,8 +285,6 @@ int mqtt_plugin_init(Plugin* plugin)
         MqttDeviceData* d_data = malloc(sizeof(MqttDeviceData));
         d_data->config = config;
         buf += bytes_to_mqtt_device_data(buf, d_data);
-        printf("%s - %s\n", d_data->name, d_data->topic);
-        printf("Device uid: %s\n", d_data->uid);
 
         /* Set device array. */
         devices.array[i].name = d_data->name;

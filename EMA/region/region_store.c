@@ -134,7 +134,9 @@ RegionStore* EMA_get_region_store(int thread_idx)
 
 int EMA_region_stores_finalize()
 {
-    for(size_t i = 0; i < EMA_thread_count; ++i)
+    for(size_t i = 0; i < EMA_thread_count; ++i) {
         EMA_region_store_finalize(EMA_region_store[i]);
+        free(EMA_region_store[i]);
+    }
     return 0;
 }

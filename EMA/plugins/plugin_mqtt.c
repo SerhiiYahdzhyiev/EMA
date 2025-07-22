@@ -286,12 +286,13 @@ int mqtt_plugin_init(Plugin* plugin)
         d_data->config = config;
         buf += bytes_to_mqtt_device_data(buf, d_data);
         printf("%s - %s\n", d_data->name, d_data->topic);
+        printf("Device uid: %s\n", d_data->uid);
 
         /* Set device array. */
         devices.array[i].name = d_data->name;
         /* TODO: Derive the type from d_data as well. */
         devices.array[i].type = strdup(DEVICE_TYPE);
-        devices.array[i].name = d_data->uid;
+        devices.array[i].uid = d_data->uid;
         devices.array[i].data = d_data;
         devices.array[i].plugin = plugin;
 

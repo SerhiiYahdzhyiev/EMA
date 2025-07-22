@@ -131,13 +131,8 @@ impl Filter {
         Filter { filter }
     }
 
-    pub fn finalize(&self) -> Result<(), i32> {
-        let res = unsafe { EMA_filter_finalize(self.filter) };
-        if res == 0 {
-            Ok(())
-        } else {
-            Err(res)
-        }
+    pub fn finalize(&self) {
+        unsafe { EMA_filter_finalize(self.filter) };
     }
 }
 

@@ -15,15 +15,14 @@ fn main() {
     for device in devices.iter() {
         println!("\t{}", device.name());
     }
-
-    let filter = EMA::Filter::new("NVML");
+    let filter = EMA::Filter::new("");
 
     let region = EMA::Region::new("region", file!(), "main", 21, &filter);
     region.begin();
     std::thread::sleep(std::time::Duration::from_secs(5));
     region.end();
 
-    filter.finalize().expect("Failed to finalize filter!");
+    filter.finalize();
 
     println!("Finalizing EMA...");
     EMA::finalize().expect("Failed to finalize EMA!");

@@ -13,7 +13,7 @@
 #include <EMA/core/registry.h>
 #include <EMA/utils/error.h>
 
-#include "plugin_mqtt.h"
+#include <EMA/plugins/plugin_mqtt.user.h>
 
 #define VERSION 0x1
 

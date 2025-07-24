@@ -172,13 +172,16 @@ int read_byte_message(
     time_t start = time(NULL);
     ByteArray* bytes = (ByteArray*)mosquitto_userdata(mqtt);
 
-    while (!bytes->message_received) {
+    while( !bytes->message_received )
+    {
         ret = mosquitto_loop(mqtt, 100, 1);
-        if (ret != MOSQ_ERR_SUCCESS) {
+        if( ret != MOSQ_ERR_SUCCESS )
+        {
             fprintf(stderr, "mosquitto_loop: %s\n", mosquitto_strerror(ret));
             return 1;
         }
-        if (difftime(time(NULL), start) >= timeout) {
+        if( difftime(time(NULL), start) >= timeout )
+        {
             fprintf(stderr, "mosquitto_loop: timed out (%d sec)\n", timeout);
             return 1;
         }

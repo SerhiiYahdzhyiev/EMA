@@ -363,7 +363,7 @@ int mqtt_plugin_finalize(Plugin* plugin)
 
 Plugin* create_mqtt_plugin(
     const char* name,
-    MqttPluginConfig* config
+    const MqttPluginConfig* config
 )
 {
     MqttPluginData* p_data = malloc(sizeof(MqttPluginData));
@@ -395,7 +395,7 @@ Plugin* create_mqtt_plugin(
     return plugin;
 }
 
-int register_mqtt_plugin(const char* name, MqttPluginConfig* config)
+int register_mqtt_plugin(const char* name, const MqttPluginConfig* config)
 {
     Plugin *plugin = create_mqtt_plugin(name, config);
     ASSERT_OR_1(plugin);

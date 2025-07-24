@@ -185,9 +185,7 @@ int read_byte_message(
             fprintf(stderr, "mosquitto_loop: timed out (%d sec)\n", timeout);
             return 1;
         }
-        usleep(100*1000); // 100ms
     }
-
     return 0;
 }
 

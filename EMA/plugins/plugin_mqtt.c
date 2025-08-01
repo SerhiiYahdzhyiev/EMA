@@ -38,6 +38,7 @@
 
 /* TODO: Make this part of registration message, instead of hard-coding. */
 #define DEVICE_TYPE "misc"
+#define EMA_MQTT_CREDS "EMA_MQTT_CREDS"
 
 /* ****************************************************************************
 **** Typedefs
@@ -69,6 +70,18 @@ typedef struct
     uint8_t type;
     MqttPluginConfig* config;
 } MqttDeviceData;
+
+typedef struct
+{
+    char* username;
+    char* password;
+} MQTTCreds;
+
+/* ****************************************************************************
+**** Globals
+**************************************************************************** */
+MQTTCreds* creds = NULL;
+char* glob_plugin_name = NULL;
 
 /* ****************************************************************************
 **** Utils
@@ -157,6 +170,22 @@ int read_byte_message(
     if( !mqtt )
         return 0;
 
+    if ( creds )
+    {
+        int ret = mosquitto_username_pw_set(
+            mqtt,
+            creds->username,
+            creds->password
+        );
+        if( ret != MOSQ_ERR_SUCCESS ) {
+            printf(
+                "Failed to set username and password: %s\n",
+                mosquitto_strerror(ret)
+            );
+            return 1;
+        }
+    }
+
     const char* host = config->host;
     const char* topic = config->topic;
     int port = config->port;
@@ -197,7 +226,7 @@ uint8_t* read_devices(MqttPluginConfig* config)
     bytes.bytes = NULL;
     bytes.message_received = 0;
 
-    struct mosquitto *mqtt = mosquitto_new(NULL, 1, &bytes);
+    struct mosquitto *mqtt = mosquitto_new(glob_plugin_name, 1, &bytes);
 
     mosquitto_message_callback_set(mqtt, on_message_read_bytes);
 
@@ -219,7 +248,7 @@ uint64_t read_energy(MqttDeviceData* device)
     bytes.bytes = NULL;
     bytes.message_received = 0;
 
-    struct mosquitto *mqtt = mosquitto_new(NULL, 1, &bytes);
+    struct mosquitto *mqtt = mosquitto_new(glob_plugin_name, 1, &bytes);
     mosquitto_message_callback_set(mqtt, on_message_read_bytes);
 
     const int timeout_sec = device->config->read_energy_timeout_sec;
@@ -242,6 +271,50 @@ uint64_t read_energy(MqttDeviceData* device)
     return msr.value;
 }
 
+static
+MQTTCreds* _parse_creds(char* cred_str)
+{ 
+    MQTTCreds* creds = malloc(sizeof(MQTTCreds));
+    char* username = strtok(cred_str, ":");
+    char* password = strtok(NULL, ":");
+    if( !password || !username )
+    {
+        free(creds);
+        return NULL;
+    }
+
+    creds->username = strdup(username);
+    creds->password = strdup(password);
+    
+    return creds;
+}
+
+static
+int init_creds(void)
+{
+    char* auth_creds = getenv(EMA_MQTT_CREDS);
+    if( auth_creds )
+    {
+        creds = _parse_creds(auth_creds);
+        if( !creds )
+        {
+            fprintf(stderr, "Failed to parse MQTT credentials!\n");
+            return 1;
+        }
+    }
+    return 0;
+}
+
+static
+void free_creds(void)
+{
+    if( creds )
+    {
+        free(creds->username);
+        free(creds->password);
+        free(creds);
+    }
+}
 /* ****************************************************************************
 **** Plugin interface
 **************************************************************************** */
@@ -255,6 +328,9 @@ int mqtt_plugin_init(Plugin* plugin)
     };
     MqttPluginData* p_data = plugin->data;
     MqttPluginConfig* config = p_data->config;
+
+    int err = init_creds();
+    if( err ) return 1;
 
     /* Initialize mosquitto. */
     mosquitto_lib_init();
@@ -354,6 +430,9 @@ int mqtt_plugin_finalize(Plugin* plugin)
     free(p_data->config);
     free(p_data);
 
+    free_creds();
+    free(glob_plugin_name);
+
     mosquitto_lib_cleanup();
     return 0;
 }
@@ -367,6 +446,8 @@ Plugin* create_mqtt_plugin(
     const MqttPluginConfig* config
 )
 {
+    glob_plugin_name = strdup(name);
+
     MqttPluginData* p_data = malloc(sizeof(MqttPluginData));
     MqttPluginConfig* _config = malloc(sizeof(MqttPluginConfig));
 

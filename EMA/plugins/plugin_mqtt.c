@@ -178,7 +178,8 @@ int read_byte_message(
             creds->password
         );
         if( ret != MOSQ_ERR_SUCCESS ) {
-            printf(
+            fprintf(
+                stderr,
                 "Failed to set username and password: %s\n",
                 mosquitto_strerror(ret)
             );

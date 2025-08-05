@@ -208,6 +208,12 @@ int main(int argc, char **argv)
 
 ### MQTT Plugin
 
+#### Auth Configuration
+
+In case your MQTT Broker requires username/password authentication set/export
+environment variable `EMA_MQTT_CREDS` containing your credentials in a format
+`<username>:<password>`.
+
 #### Message Formats
 
 ###### General

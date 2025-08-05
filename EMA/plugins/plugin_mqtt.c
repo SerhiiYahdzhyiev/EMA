@@ -187,6 +187,7 @@ uint8_t* read_devices(MqttPluginConfig* config)
 
     int err = read_byte_message(
         mqtt, config->host, config->port, config->topic);
+    if (err) mosquitto_destroy(mqtt);
     MQTT_HANDLE_ERR_RET_NULL(err, "Failed to read byte message.\n");
 
     mosquitto_destroy(mqtt);
@@ -210,6 +211,7 @@ uint64_t read_energy(MqttDeviceData* device)
         device->config->port,
         device->topic
     );
+    if (err) mosquitto_destroy(mqtt);
     MQTT_HANDLE_ERR_RET_1(err, "Failed to read byte message.\n");
 
     mosquitto_destroy(mqtt);
@@ -229,7 +231,8 @@ static
 int mqtt_plugin_init(Plugin* plugin)
 {
     DeviceArray devices;
-    MqttPluginConfig *config = plugin->data;
+    MqttPluginData* p_data = plugin->data;
+    MqttPluginConfig* config = p_data->config;
 
     /* Initialize mosquitto. */
     mosquitto_lib_init();
@@ -277,12 +280,9 @@ int mqtt_plugin_init(Plugin* plugin)
     }
     free(bytes);
 
-    /* Set plugin data. */
-    MqttPluginData* p_data = malloc(sizeof(MqttPluginData));
+    /* Set plugin data devices. */
     p_data->devices = devices;
-    p_data->config = config;
 
-    plugin->data = p_data;
     return 0;
 }
 
@@ -342,10 +342,15 @@ int mqtt_plugin_finalize(Plugin* plugin)
 Plugin* create_mqtt_plugin(
     const char* name, const char* host, uint16_t port, const char* topic)
 {
+    MqttPluginData* p_data = malloc(sizeof(MqttPluginData));
     MqttPluginConfig* config = malloc(sizeof(MqttPluginConfig));
     config->host = host;
     config->port = port;
     config->topic = topic;
+
+    p_data->devices.array = NULL;
+    p_data->devices.size = 0;
+    p_data->config = config;
 
     Plugin* plugin = malloc(sizeof(Plugin));
     ASSERT_OR_NULL(plugin);
@@ -357,7 +362,7 @@ Plugin* create_mqtt_plugin(
     plugin->cbs.get_energy_max = mqtt_plugin_get_energy_max;
     plugin->cbs.get_energy_uj = mqtt_plugin_get_energy_uj;
     plugin->cbs.finalize = mqtt_plugin_finalize;
-    plugin->data = config;
+    plugin->data = p_data;
     plugin->name = name;
 
     return plugin;

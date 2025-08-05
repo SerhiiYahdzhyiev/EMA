@@ -58,8 +58,15 @@ typedef struct
 
 typedef struct
 {
+    char* username;
+    char* password;
+} MqttCreds;
+
+typedef struct
+{
     DeviceArray devices;
     MqttPluginConfig* config;
+    MqttCreds* creds;
 } MqttPluginData;
 
 typedef struct
@@ -71,16 +78,9 @@ typedef struct
     MqttPluginConfig* config;
 } MqttDeviceData;
 
-typedef struct
-{
-    char* username;
-    char* password;
-} MQTTCreds;
-
 /* ****************************************************************************
 **** Globals
 **************************************************************************** */
-MQTTCreds* creds = NULL;
 char* glob_plugin_name = NULL;
 
 /* ****************************************************************************
@@ -163,12 +163,15 @@ void on_message_read_bytes(
 static
 int read_byte_message(
     struct mosquitto *mqtt,
-    MqttPluginConfig* config,
+    MqttPluginData* data,
     int timeout
 )
 {
     if( !mqtt )
         return 0;
+
+    MqttPluginConfig* config = data->config;
+    MqttCreds* creds = data->creds;
 
     if ( creds )
     {
@@ -220,19 +223,21 @@ int read_byte_message(
 }
 
 static
-uint8_t* read_devices(MqttPluginConfig* config)
+uint8_t* read_devices(MqttPluginData* data)
 {
     ByteArray bytes;
     bytes.size = 0;
     bytes.bytes = NULL;
     bytes.message_received = 0;
 
+    MqttPluginConfig* config = data->config;
+
     struct mosquitto *mqtt = mosquitto_new(glob_plugin_name, 1, &bytes);
 
     mosquitto_message_callback_set(mqtt, on_message_read_bytes);
 
     const int timeout_sec = config->read_devices_timeout_sec;
-    int err = read_byte_message(mqtt, config, timeout_sec);
+    int err = read_byte_message(mqtt, data, timeout_sec);
     if (err) mosquitto_destroy(mqtt);
     MQTT_HANDLE_ERR_RET_NULL(err, "Failed to read byte message.\n");
 
@@ -242,7 +247,7 @@ uint8_t* read_devices(MqttPluginConfig* config)
 }
 
 static
-uint64_t read_energy(MqttDeviceData* device)
+uint64_t read_energy(MqttDeviceData* device, MqttPluginData* data)
 {
     ByteArray bytes;
     bytes.size = 0;
@@ -259,7 +264,12 @@ uint64_t read_energy(MqttDeviceData* device)
         .topic = device->topic
     };
 
-    int err = read_byte_message(mqtt, &device_config, timeout_sec);
+    MqttPluginData _data = {
+        .config = &device_config,
+        .creds = data->creds
+    };
+
+    int err = read_byte_message(mqtt, &_data, timeout_sec);
     if (err) mosquitto_destroy(mqtt);
     MQTT_HANDLE_ERR_RET_1(err, "Failed to read byte message.\n");
 
@@ -273,9 +283,9 @@ uint64_t read_energy(MqttDeviceData* device)
 }
 
 static
-MQTTCreds* _parse_creds(char* cred_str)
+MqttCreds* _parse_creds(char* cred_str)
 { 
-    MQTTCreds* creds = malloc(sizeof(MQTTCreds));
+    MqttCreds* creds = malloc(sizeof(MqttCreds));
     char* username = strtok(cred_str, ":");
     char* password = strtok(NULL, ":");
     if( !password || !username )
@@ -291,23 +301,23 @@ MQTTCreds* _parse_creds(char* cred_str)
 }
 
 static
-int init_creds(void)
+MqttCreds* init_creds(void)
 {
     char* auth_creds = getenv(EMA_MQTT_CREDS);
+    MqttCreds* creds = NULL;
     if( auth_creds )
     {
         creds = _parse_creds(auth_creds);
         if( !creds )
         {
             fprintf(stderr, "Failed to parse MQTT credentials!\n");
-            return 1;
         }
     }
-    return 0;
+    return creds;
 }
 
 static
-void free_creds(void)
+void free_creds(MqttCreds* creds)
 {
     if( creds )
     {
@@ -330,14 +340,13 @@ int mqtt_plugin_init(Plugin* plugin)
     MqttPluginData* p_data = plugin->data;
     MqttPluginConfig* config = p_data->config;
 
-    int err = init_creds();
-    if( err ) return 1;
+    p_data->creds = init_creds();
 
     /* Initialize mosquitto. */
     mosquitto_lib_init();
 
     /* Set device count. */
-    uint8_t* bytes = read_devices(config);
+    uint8_t* bytes = read_devices(p_data);
     MQTT_HANDLE_ERR_RET_1(bytes == NULL, "Failed to read devices.\n");
 
     /* Check version. */
@@ -406,7 +415,7 @@ unsigned long long mqtt_plugin_get_energy_max(const Device* device)
 static
 unsigned long long mqtt_plugin_get_energy_uj(const Device* device)
 {
-    return read_energy(device->data);
+    return read_energy(device->data, device->plugin->data);
 }
 
 static
@@ -426,12 +435,12 @@ int mqtt_plugin_finalize(Plugin* plugin)
     }
 
     free(p_data->devices.array);
+    free_creds(p_data->creds);
     free(p_data->config->host);
     free(p_data->config->topic);
     free(p_data->config);
     free(p_data);
 
-    free_creds();
     free(glob_plugin_name);
 
     mosquitto_lib_cleanup();

@@ -2,7 +2,15 @@
 
 #include <EMA/core/plugin.user.h>
 
-Plugin* create_mqtt_plugin(
-    const char* name, const char* host, uint16_t port, const char* topic);
-int register_mqtt_plugin(
-    const char* name, const char* host, uint16_t port, const char* topic);
+typedef struct
+{
+    char* host;
+    uint16_t port;
+    char* topic;
+    int read_devices_timeout_sec;
+    int read_energy_timeout_sec;
+} MqttPluginConfig;
+
+Plugin* create_mqtt_plugin(const char* name, const MqttPluginConfig* config);
+
+int register_mqtt_plugin(const char* name, const MqttPluginConfig* config);

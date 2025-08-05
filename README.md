@@ -232,9 +232,9 @@ MQTT topic.
 | Byte Offset           | Field       | Type       | Description                                       |
 | --------------------- | ----------- | ---------- | ------------------------------------------------- |
 | 0                     | `name_len`  | `uint64_t` | Length of device name (in bytes)                  |
-| 8                     | `name (uid)`| `char[]`   | String (UTF-8/ASCII), not null-terminated         |
+| 8                     | `name (uid)`| `char[]`   | String (ASCII), not null-terminated         |
 | 8+name_len            | `topic_len` | `uint64_t` | Length of MQTT topic name                         |
-| 16+name_len           | `topic`     | `char[]`   | String (UTF-8/ASCII), not null-terminated         |
+| 16+name_len           | `topic`     | `char[]`   | String (ASCII), not null-terminated         |
 | 16+name_len+topic_len | `type`      | `uint8_t`  | Device type ID (implementation-defined)           |
 
 *NOTE: Currently it is assumed that the `name` fields of the devices should be

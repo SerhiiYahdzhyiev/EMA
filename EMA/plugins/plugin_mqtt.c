@@ -438,8 +438,6 @@ int mqtt_plugin_finalize(Plugin* plugin)
     free(p_data->name);
     free(p_data);
 
-    free(glob_plugin_name);
-
     mosquitto_lib_cleanup();
     return 0;
 }

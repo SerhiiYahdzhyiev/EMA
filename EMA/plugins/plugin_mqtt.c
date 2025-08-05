@@ -159,15 +159,15 @@ void on_message_read_bytes(
 static
 int read_byte_message(
     struct mosquitto *mqtt,
-    MqttPluginData* data,
+    const char* host,
+    const char* topic,
+    uint16_t port,
+    MqttCreds* creds,
     int timeout
 )
 {
     if( !mqtt )
         return 0;
-
-    MqttPluginConfig* config = data->config;
-    MqttCreds* creds = data->creds;
 
     if ( creds )
     {
@@ -185,10 +185,6 @@ int read_byte_message(
             return 1;
         }
     }
-
-    const char* host = config->host;
-    const char* topic = config->topic;
-    int port = config->port;
 
     int ret = mosquitto_connect(mqtt, host, port, 5);
     MQTT_HANDLE_ERR_RET_1(
@@ -233,7 +229,14 @@ uint8_t* read_devices(MqttPluginData* data)
     mosquitto_message_callback_set(mqtt, on_message_read_bytes);
 
     const int timeout_sec = config->read_devices_timeout_sec;
-    int err = read_byte_message(mqtt, data, timeout_sec);
+    int err = read_byte_message(
+        mqtt,
+        config->host,
+        config->topic,
+        config->port,
+        data->creds,
+        timeout_sec
+    );
     if (err) mosquitto_destroy(mqtt);
     MQTT_HANDLE_ERR_RET_NULL(err, "Failed to read byte message.\n");
 
@@ -254,18 +257,15 @@ uint64_t read_energy(MqttDeviceData* device, MqttPluginData* data)
     mosquitto_message_callback_set(mqtt, on_message_read_bytes);
 
     const int timeout_sec = device->config->read_energy_timeout_sec;
-    MqttPluginConfig device_config = {
-        .host = device->config->host,
-        .port = device->config->port,
-        .topic = device->topic
-    };
 
-    MqttPluginData _data = {
-        .config = &device_config,
-        .creds = data->creds
-    };
-
-    int err = read_byte_message(mqtt, &_data, timeout_sec);
+    int err = read_byte_message(
+        mqtt,
+        device->config->host,
+        device->topic,
+        device->config->port,
+        data->creds,
+        timeout_sec
+    );
     if (err) mosquitto_destroy(mqtt);
     MQTT_HANDLE_ERR_RET_1(err, "Failed to read byte message.\n");
 

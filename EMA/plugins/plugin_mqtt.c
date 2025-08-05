@@ -64,6 +64,7 @@ typedef struct
 
 typedef struct
 {
+    char* name;
     DeviceArray devices;
     MqttPluginConfig* config;
     MqttCreds* creds;
@@ -77,11 +78,6 @@ typedef struct
     uint8_t type;
     MqttPluginConfig* config;
 } MqttDeviceData;
-
-/* ****************************************************************************
-**** Globals
-**************************************************************************** */
-char* glob_plugin_name = NULL;
 
 /* ****************************************************************************
 **** Utils
@@ -232,7 +228,7 @@ uint8_t* read_devices(MqttPluginData* data)
 
     MqttPluginConfig* config = data->config;
 
-    struct mosquitto *mqtt = mosquitto_new(glob_plugin_name, 1, &bytes);
+    struct mosquitto *mqtt = mosquitto_new(data->name, 1, &bytes);
 
     mosquitto_message_callback_set(mqtt, on_message_read_bytes);
 
@@ -254,7 +250,7 @@ uint64_t read_energy(MqttDeviceData* device, MqttPluginData* data)
     bytes.bytes = NULL;
     bytes.message_received = 0;
 
-    struct mosquitto *mqtt = mosquitto_new(glob_plugin_name, 1, &bytes);
+    struct mosquitto *mqtt = mosquitto_new(data->name, 1, &bytes);
     mosquitto_message_callback_set(mqtt, on_message_read_bytes);
 
     const int timeout_sec = device->config->read_energy_timeout_sec;
@@ -434,11 +430,12 @@ int mqtt_plugin_finalize(Plugin* plugin)
         free(d_data);
     }
 
-    free(p_data->devices.array);
     free_creds(p_data->creds);
+    free(p_data->devices.array);
     free(p_data->config->host);
     free(p_data->config->topic);
     free(p_data->config);
+    free(p_data->name);
     free(p_data);
 
     free(glob_plugin_name);
@@ -456,8 +453,6 @@ Plugin* create_mqtt_plugin(
     const MqttPluginConfig* config
 )
 {
-    glob_plugin_name = strdup(name);
-
     MqttPluginData* p_data = malloc(sizeof(MqttPluginData));
     MqttPluginConfig* _config = malloc(sizeof(MqttPluginConfig));
 
@@ -470,6 +465,7 @@ Plugin* create_mqtt_plugin(
     p_data->devices.array = NULL;
     p_data->devices.size = 0;
     p_data->config = _config;
+    p_data->name = strdup(name);
 
     Plugin* plugin = malloc(sizeof(Plugin));
     ASSERT_OR_NULL(plugin);

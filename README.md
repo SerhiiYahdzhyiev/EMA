@@ -89,6 +89,18 @@ Current version comes with the following pre-developed plugins:
    ```bash
    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:<EMA_install_dir>/lib
    ```
+### MQTT Plugin
+
+#### Dependencies
+
+1. [Mosquitto C Library](https://mosquitto.org/)
+
+#### Enabling/installation
+
+On the *Step 3* from [General steps](#general-steps) set the `MOSQUITTO_DIR`
+pointing to a Mosquitto installation directory (if you've used default
+installation path the value should be automatically set by *CMake* on
+`find_package()` call).
 
 ### Documentation
 
@@ -110,7 +122,7 @@ documentation.
 
 ## Usage
 
-### Example
+### Basic Example
 
 ```C
 #include <EMA.h>
@@ -194,6 +206,50 @@ int main(int argc, char **argv)
 }
 ```
 
+### MQTT Plugin
+
+#### Message Formats
+
+###### General
+
+All multi-byte fields are serialized in **little-endian** format:
+   - Integer values are parsed using [corresponding functions](https://linux.die.net/man/3/le64toh).
+   - Strings are raw byte arrays, not null-terminated.
+
+###### (Device) Registration Message
+
+Used during plugin initialization, this message must be retained on a dedicated
+MQTT topic.
+
+| Byte Offset | Field                | Type             | Description                                                              |
+| ----------- | -------------------- | ---------------- | ------------------------------------------------------------------------ |
+| 0           | `version`            | `uint8_t`        | Protocol version (must match `VERSION` from `EMA/plugins/plugin_mqtt.c`) |
+| 1           | `device_count`       | `uint16_t`       | Number of device entries following                                       |
+| 3           | `device_array`       | `Device Entry[]` | Each device is described as below                                        |
+
+**Device Entry Format**
+
+| Byte Offset           | Field       | Type       | Description                                       |
+| --------------------- | ----------- | ---------- | ------------------------------------------------- |
+| 0                     | `name_len`  | `uint64_t` | Length of device name (in bytes)                  |
+| 8                     | `name (uid)`| `char[]`   | String (ASCII), not null-terminated         |
+| 8+name_len            | `topic_len` | `uint64_t` | Length of MQTT topic name                         |
+| 16+name_len           | `topic`     | `char[]`   | String (ASCII), not null-terminated         |
+| 16+name_len+topic_len | `type`      | `uint8_t`  | Device type ID (implementation-defined)           |
+
+*NOTE: Currently it is assumed that the `name` fields of the devices should be
+unique for the single setup. That might change with future releases of EMA.*
+
+###### Energy Readings Message
+
+These messages are sent to device-specific MQTT topics (provided by the
+registration message).
+
+| Byte Offset | Field   | Type       | Description                        |
+| ----------- | ------- | ---------- | ---------------------------------- |
+| 0           | `value` | `uint64_t` | Energy reading in micro-Joule (uJ) |
+| 8           | `time`  | `uint64_t` | Time in microseconds (us)          |
+
 ### Compiling applications
 
 ```bash
@@ -207,17 +263,17 @@ CSV-like output file `output.EMA.<pid>`. It contains information about the
 measurements. The first line is the header. Subsequent lines represent
 measurement results per region and device.
 
-| name | description |
-| ---- | ----------- |
-| thread | Thread ID. |
-| region_idf | Region identifier as defined by the user (e.g. with `EMA_REGION_DEFINE`). |
-| file | File in which the region was defined. |
-| line | Line number in which the region was defined. |
-| function | Name of the function in which the region was defined. |
-| visits | Number of visitis for that region. |
-| device_name | Name of the device under measurement. |
-| energy | Measured energy consumption in uJ (micro joules). |
-| time | Measured duration in us (micro seconds). |
+| name        | description                                                               |
+| ----------- | ------------------------------------------------------------------------- |
+| thread      | Thread ID.                                                                |
+| region_idf  | Region identifier as defined by the user (e.g. with `EMA_REGION_DEFINE`). |
+| file        | File in which the region was defined.                                     |
+| line        | Line number in which the region was defined.                              |
+| function    | Name of the function in which the region was defined.                     |
+| visits      | Number of visitis for that region.                                        |
+| device_name | Name of the device under measurement.                                     |
+| energy      | Measured energy consumption in uJ (micro joules).                         |
+| time        | Measured duration in us (micro seconds).                                  |
 
 ### Troubleshooting
 

@@ -237,7 +237,7 @@ MQTT topic.
 | 16+name_len           | `topic`     | `char[]`   | String (UTF-8/ASCII), not null-terminated         |
 | 16+name_len+topic_len | `type`      | `uint8_t`  | Device type ID (implementation-defined)           |
 
-*NOTE: Currently it is assumed that the `name` fileds of the devices should be
+*NOTE: Currently it is assumed that the `name` fields of the devices should be
 unique for the single setup. That might change with future releases of EMA.*
 
 ###### Energy Readings Message

@@ -39,6 +39,8 @@ target_sources(
     # plugins
     PRIVATE EMA/plugins/plugin_rapl.c
     PRIVATE EMA/plugins/plugin_rapl.h
+    PRIVATE EMA/plugins/plugin_ryzen.c
+    PRIVATE EMA/plugins/plugin_ryzen.h
     # region
     PRIVATE EMA/region/filter.c
     PRIVATE EMA/region/filter.h

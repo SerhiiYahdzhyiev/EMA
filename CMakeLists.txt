@@ -20,6 +20,13 @@ add_library(
 )
 set_property(TARGET hashmap PROPERTY POSITION_INDEPENDENT_CODE ON)
 
+add_library(
+    libsmu STATIC
+    EMA/ext/libsmu/libsmu.c
+    EMA/ext/libsmu/libsmu.h
+)
+set_property(TARGET libsmu PROPERTY POSITION_INDEPENDENT_CODE ON)
+
 # EMA
 add_library(EMA SHARED)
 target_sources(
@@ -65,6 +72,7 @@ target_sources(
 target_include_directories(EMA PRIVATE .)
 target_compile_definitions(EMA PRIVATE _GNU_SOURCE)
 target_link_libraries(EMA PRIVATE hashmap Threads::Threads)
+target_link_libraries(EMA PRIVATE libsmu Threads::Threads)
 
 if( CUDAToolkit_FOUND )
     # NVML plugin

@@ -7,6 +7,7 @@
     #include <EMA/plugins/plugin_nvml.h>
 #endif
 #include <EMA/plugins/plugin_rapl.h>
+#include <EMA/plugins/plugin_ryzen.h>
 #include <EMA/region/output.h>
 #include <EMA/region/region_store.h>
 
@@ -50,6 +51,10 @@ int EMA_init(EMA_init_cb callback)
     #endif
 
     err = register_rapl_plugin();
+    if( err )
+        return err;
+
+    err = register_ryzen_plugin();
     if( err )
         return err;
 

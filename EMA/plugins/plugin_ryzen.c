@@ -19,12 +19,6 @@
 
 /* Typedefs */
 
-typedef struct {
-    float SOCKET_POWER;
-    float VDDCR_CPU_POWER;
-    float CORE_POWER[8];
-} pm_table_0x240903, *ppm_table_0x240903;
-
 typedef enum {
     PACKAGE,
     CORE
